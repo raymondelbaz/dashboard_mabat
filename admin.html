@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד מנהל — מב"ט בסיסי 2026</title>
+    <style>
+        :root {
+            --p:#1a2a6c; --s:#b21f1f; --a:#fdbb2d; --g:#27ae60;
+            --bg:#0f172a; --card:#1e293b; --border:#334155;
+            --text:#e2e8f0; --muted:#94a3b8; --soft:#cbd5e1;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;font-size:15px;line-height:1.6;}
+        input,select,textarea,button{font-family:'Segoe UI',sans-serif;}
+
+        /* ── Layout ── */
+        .layout{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+
+        /* ── Sidebar ── */
+        .sidebar{background:rgba(30,41,59,0.98);border-left:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+        .sb-brand{padding:20px 16px 16px;border-bottom:1px solid var(--border);}
+        .sb-badge{display:inline-block;font-size:0.7em;letter-spacing:.08em;color:#93c5fd;border:1px solid #1d4ed8;padding:3px 8px;border-radius:999px;background:rgba(29,78,216,.15);margin-bottom:9px;}
+        .sb-title{font-size:1.1em;font-weight:700;color:var(--a);margin-bottom:2px;}
+        .sb-sub{font-size:0.75em;color:var(--muted);}
+        .sb-nav{padding:12px 8px;flex:1;}
+        .sb-section{font-size:0.68em;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding:10px 10px 5px;margin-top:6px;}
+        .nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;font-size:0.88em;color:var(--soft);cursor:pointer;transition:all .18s;margin-bottom:2px;user-select:none;border:none;background:transparent;width:100%;text-align:right;}
+        .nav-item:hover{background:rgba(255,255,255,.06);color:var(--text);}
+        .nav-item.active{background:rgba(253,187,45,.12);color:var(--a);border-right:3px solid var(--a);font-weight:600;}
+        .nav-item .ni{font-size:1em;min-width:18px;text-align:center;}
+        .sb-footer{padding:12px 14px;border-top:1px solid var(--border);}
+        .btn-logout{width:100%;padding:8px 12px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.82em;cursor:pointer;transition:all .2s;}
+        .btn-logout:hover{border-color:var(--s);color:#fca5a5;background:rgba(178,31,31,.08);}
+        .btn-student-view{width:100%;padding:8px 12px;background:rgba(29,78,216,.15);border:1px solid #1d4ed8;border-radius:8px;color:#93c5fd;font-size:0.82em;cursor:pointer;margin-bottom:8px;transition:all .2s;}
+        .btn-student-view:hover{background:rgba(29,78,216,.28);}
+
+        /* ── Main ── */
+        .main-area{display:flex;flex-direction:column;overflow-x:hidden;}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 26px;background:rgba(30,41,59,.9);border-bottom:2px solid var(--a);backdrop-filter:blur(8px);position:sticky;top:0;z-index:50;}
+        .topbar-left h1{font-size:1.1em;font-weight:700;color:var(--a);margin-bottom:1px;}
+        .topbar-left p{font-size:0.75em;color:var(--muted);}
+        .topbar-right{display:flex;align-items:center;gap:12px;}
+        .clock{font-family:'Courier New',monospace;font-size:0.88em;color:var(--soft);letter-spacing:.04em;background:rgba(0,0,0,.3);padding:4px 10px;border-radius:6px;border:1px solid var(--border);}
+        .user-pill{display:flex;align-items:center;gap:7px;background:rgba(253,187,45,.08);border:1px solid rgba(253,187,45,.3);padding:5px 12px;border-radius:999px;font-size:0.82em;color:var(--a);font-weight:600;}
+        .user-av{width:22px;height:22px;background:var(--a);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72em;font-weight:700;}
+
+        /* ── Tab panels ── */
+        .dash-body{padding:24px;flex:1;}
+        .tab-panel{display:none;}
+        .tab-panel.active{display:block;}
+
+        /* ── KPI ── */
+        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;}
+        .kpi-card{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:18px 16px 14px;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+        .kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.4);}
+        .kpi-card::after{content:'';position:absolute;bottom:0;right:0;left:0;height:3px;border-radius:0 0 14px 14px;}
+        .kpi-card.total::after{background:linear-gradient(90deg,#1d4ed8,#38bdf8);}
+        .kpi-card.passed::after{background:linear-gradient(90deg,#15803d,var(--g));}
+        .kpi-card.failed::after{background:linear-gradient(90deg,#991b1b,var(--s));}
+        .kpi-card.avg::after{background:linear-gradient(90deg,#92400e,var(--a));}
+        .kpi-label{font-size:.72em;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+        .kpi-value{font-size:2.5em;font-weight:700;line-height:1;margin-bottom:4px;}
+        .kpi-card.total .kpi-value{color:#60a5fa;}
+        .kpi-card.passed .kpi-value{color:var(--g);}
+        .kpi-card.failed .kpi-value{color:#f87171;}
+        .kpi-card.avg .kpi-value{color:var(--a);}
+        .kpi-sub{font-size:.76em;color:var(--muted);}
+        .kpi-bar-wrap{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:12px;overflow:hidden;}
+        .kpi-bar{height:100%;border-radius:2px;transition:width .9s ease;}
+        .kpi-card.passed .kpi-bar{background:linear-gradient(90deg,#15803d,var(--g));}
+        .kpi-card.failed .kpi-bar{background:linear-gradient(90deg,#991b1b,var(--s));}
+        .kpi-card.avg .kpi-bar{background:linear-gradient(90deg,#92400e,var(--a));}
+
+        /* ── Charts ── */
+        .charts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px;}
+        .chart-card{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:18px;}
+        .chart-title{font-size:.72em;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:14px;}
+        .donut-wrap{display:flex;align-items:center;gap:14px;}
+        .legend-item{display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:.84em;}
+        .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+        .legend-label{color:var(--soft);}
+        .legend-val{color:var(--text);font-weight:700;margin-right:auto;}
+        .bar-chart{display:flex;align-items:flex-end;gap:5px;height:80px;margin-top:6px;}
+        .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+        .bar-col-inner{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .7s ease;}
+        .quick-stat{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+        .quick-stat:last-child{margin-bottom:0;}
+        .qs-label{font-size:.72em;color:var(--muted);margin-bottom:3px;}
+        .qs-val{font-size:1.4em;font-weight:700;}
+
+        /* ── Table (shared) ── */
+        .table-section{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+        .table-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);}
+        .table-title{font-size:.85em;font-weight:700;color:var(--a);letter-spacing:.04em;}
+        .table-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .search-wrap{position:relative;}
+        .search-icon{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:.85em;color:var(--muted);pointer-events:none;}
+        .search-input{background:#334155;border:1px solid var(--border);color:var(--text);padding:7px 28px 7px 10px;border-radius:7px;outline:none;font-size:.84em;width:190px;direction:rtl;transition:border-color .2s,width .2s;}
+        .search-input::placeholder{color:var(--muted);}
+        .search-input:focus{border-color:var(--a);width:230px;}
+        .filter-select{background:#334155;border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;outline:none;font-size:.84em;direction:rtl;cursor:pointer;}
+        .filter-select:focus{border-color:var(--a);}
+        .btn-sm{padding:7px 14px;border:none;border-radius:7px;font-size:.82em;font-weight:600;cursor:pointer;transition:all .2s;}
+        .btn-export{background:rgba(253,187,45,.1);border:1px solid rgba(253,187,45,.35);color:var(--a);}
+        .btn-export:hover{background:rgba(253,187,45,.2);border-color:var(--a);}
+        .btn-danger{background:rgba(178,31,31,.15);border:1px solid rgba(178,31,31,.4);color:#f87171;}
+        .btn-danger:hover{background:rgba(178,31,31,.28);}
+        .btn-success{background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.4);color:var(--g);}
+        .btn-success:hover{background:rgba(39,174,96,.28);}
+        .btn-primary{background:rgba(29,78,216,.2);border:1px solid rgba(29,78,216,.4);color:#93c5fd;}
+        .btn-primary:hover{background:rgba(29,78,216,.35);}
+        .table-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;}
+        thead tr{background:rgba(0,0,0,.25);border-bottom:1px solid var(--border);}
+        th{padding:10px 16px;font-size:.72em;font-weight:700;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none;white-space:nowrap;transition:color .15s;}
+        th:hover{color:var(--soft);}
+        th.sorted{color:var(--a);}
+        .sort-arr{font-size:.68em;margin-right:3px;}
+        tbody tr{border-bottom:1px solid rgba(51,65,85,.5);transition:background .15s;}
+        tbody tr:last-child{border-bottom:none;}
+        tbody tr:hover{background:rgba(253,187,45,.04);}
+        td{padding:11px 16px;font-size:.88em;color:var(--soft);vertical-align:middle;}
+        .td-name{font-weight:600;color:var(--text);}
+        .td-id{font-family:'Courier New',monospace;font-size:.82em;color:var(--muted);}
+        .td-date{font-size:.8em;color:var(--muted);}
+        .grade-pill{display:inline-flex;align-items:center;justify-content:center;min-width:46px;padding:2px 9px;border-radius:5px;font-weight:700;font-size:.88em;}
+        .grade-pill.pass{background:rgba(39,174,96,.15);color:var(--g);border:1px solid rgba(39,174,96,.35);}
+        .grade-pill.fail{background:rgba(178,31,31,.15);color:#f87171;border:1px solid rgba(178,31,31,.35);}
+        .grade-pill.pending{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);}
+        .status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.78em;font-weight:700;}
+        .status-badge.pass{background:rgba(39,174,96,.12);color:var(--g);border:1px solid rgba(39,174,96,.3);}
+        .status-badge.fail{background:rgba(178,31,31,.12);color:#f87171;border:1px solid rgba(178,31,31,.3);}
+        .status-badge.pending{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border);}
+        .sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+        .pass .sdot{background:var(--g);} .fail .sdot{background:#f87171;} .pending .sdot{background:var(--muted);}
+        .table-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:11px 20px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);font-size:.8em;color:var(--muted);}
+        .table-footer span{color:var(--a);font-weight:700;}
+        .pagination{display:flex;gap:3px;}
+        .page-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:.8em;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:5px;cursor:pointer;transition:all .15s;}
+        .page-btn:hover{border-color:var(--a);color:var(--a);}
+        .page-btn.active{background:rgba(253,187,45,.15);border-color:var(--a);color:var(--a);}
+        .empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:.88em;}
+        .cb{width:15px;height:15px;cursor:pointer;accent-color:var(--a);}
+
+        /* ── ניהול חניכים ── */
+        .add-form-box{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:18px;}
+        .add-form-title{font-size:.85em;font-weight:700;color:var(--a);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .add-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px;}
+        .form-input{background:#334155;border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:7px;outline:none;font-size:.88em;width:100%;direction:rtl;}
+        .form-input:focus{border-color:var(--a);}
+        .form-input::placeholder{color:var(--muted);}
+        .add-form-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+        .bulk-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:rgba(178,31,31,.08);border:1px solid rgba(178,31,31,.3);border-radius:8px;min-height:40px;}
+        .bulk-bar.hidden{display:none;}
+        .bulk-count{font-size:.82em;color:#f87171;font-weight:600;}
+
+        /* ── תוצאות מבחנים ── */
+        .results-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+        .score-bar-wrap{display:flex;align-items:center;gap:8px;}
+        .score-bar-bg{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;flex:1;}
+        .score-bar-fill{height:100%;border-radius:3px;}
+
+        /* ── הגדרות מבחן ── */
+        .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+        .settings-card{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:20px;}
+        .settings-card h3{font-size:.88em;font-weight:700;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+        .setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+        .setting-label{font-size:.84em;color:var(--soft);}
+        .setting-input{background:#334155;border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;outline:none;font-size:.88em;width:80px;direction:ltr;text-align:center;}
+        .setting-input:focus{border-color:var(--a);}
+        .save-settings-btn{width:100%;padding:9px;background:linear-gradient(135deg,#92400e,var(--a));border:none;border-radius:8px;color:var(--bg);font-weight:700;font-size:.88em;cursor:pointer;margin-top:8px;transition:opacity .2s;}
+        .save-settings-btn:hover{opacity:.88;}
+        .settings-note{font-size:.76em;color:var(--muted);margin-top:8px;line-height:1.5;}
+        .toggle-wrap{display:flex;align-items:center;gap:8px;}
+        .toggle{position:relative;width:38px;height:20px;cursor:pointer;}
+        .toggle input{opacity:0;width:0;height:0;}
+        .toggle-slider{position:absolute;inset:0;background:#334155;border-radius:20px;transition:.3s;}
+        .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;left:3px;top:3px;transition:.3s;}
+        .toggle input:checked+.toggle-slider{background:var(--g);}
+        .toggle input:checked+.toggle-slider::before{transform:translateX(18px);}
+
+        /* ── ייצוא דוחות ── */
+        .export-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+        .export-card{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+        .export-card h3{font-size:.88em;font-weight:700;color:var(--a);margin-bottom:2px;}
+        .export-card p{font-size:.8em;color:var(--muted);line-height:1.55;}
+        .export-btn-full{width:100%;padding:10px;background:rgba(253,187,45,.1);border:1px solid rgba(253,187,45,.35);color:var(--a);border-radius:8px;font-weight:700;font-size:.88em;cursor:pointer;margin-top:auto;transition:all .2s;}
+        .export-btn-full:hover{background:rgba(253,187,45,.2);}
+
+        /* ── ניהול הרשאות ── */
+        .perms-card{background:rgba(30,41,59,.8);border:1px solid var(--border);border-radius:14px;padding:20px;max-width:440px;}
+        .perms-card h3{font-size:.88em;font-weight:700;color:var(--a);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+        .perms-note{font-size:.76em;color:#94a3b8;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:14px;line-height:1.55;}
+        .perm-field{margin-bottom:12px;}
+        .perm-label{display:block;font-size:.76em;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+        .perm-input{background:#334155;border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:7px;outline:none;font-size:.88em;width:100%;direction:ltr;}
+        .perm-input:focus{border-color:var(--a);}
+        .perm-error{color:#f87171;font-size:.78em;margin-top:4px;display:none;}
+        .perm-success{color:var(--g);font-size:.78em;margin-top:4px;display:none;}
+
+        /* ── Toast ── */
+        .toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1e293b;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.85em;color:var(--text);display:none;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:300px;}
+        .toast.show{display:flex;}
+        .toast.ok{border-color:var(--g);}
+        .toast.err{border-color:#f87171;}
+
+        /* ── Modal confirm ── */
+        .confirm-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;}
+        .confirm-overlay.open{display:flex;}
+        .confirm-box{background:#1e293b;border:1px solid var(--border);border-top:3px solid #f87171;border-radius:14px;padding:28px 24px;width:100%;max-width:340px;text-align:center;}
+        .confirm-box h3{color:#f87171;margin-bottom:8px;font-size:1em;}
+        .confirm-box p{color:var(--muted);font-size:.85em;margin-bottom:20px;line-height:1.5;}
+        .confirm-actions{display:flex;gap:8px;justify-content:center;}
+
+        /* ── Responsive ── */
+        @media(max-width:900px){.layout{grid-template-columns:1fr;} .sidebar{display:none;} .dash-body{padding:14px;}}
+        @media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr;} .topbar-right .clock{display:none;}}
+    </style>
+</head>
+<body>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Confirm Modal ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <h3 id="confirmTitle">אישור מחיקה</h3>
+        <p id="confirmMsg"></p>
+        <div class="confirm-actions">
+            <button class="btn-sm btn-danger" id="confirmYes">כן, מחק</button>
+            <button class="btn-sm btn-primary" onclick="closeConfirm()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+        <div class="sb-brand">
+            <div class="sb-badge">MABAT // ADMIN PORTAL</div>
+            <div class="sb-title">מב"ט בסיסי 2026</div>
+            <div class="sb-sub">ממשק ניהול מערכת</div>
+        </div>
+        <nav class="sb-nav">
+            <div class="sb-section">ניטור</div>
+            <button class="nav-item active" data-tab="dashboard">  <span class="ni">📊</span> דשבורד ראשי</button>
+            <button class="nav-item" data-tab="students">          <span class="ni">👥</span> ניהול חניכים</button>
+            <button class="nav-item" data-tab="results">           <span class="ni">📈</span> תוצאות מבחנים</button>
+            <div class="sb-section">מערכת</div>
+            <button class="nav-item" data-tab="settings">          <span class="ni">⚙️</span> הגדרות מבחן</button>
+            <button class="nav-item" data-tab="export">            <span class="ni">📄</span> ייצוא דוחות</button>
+            <button class="nav-item" data-tab="permissions">       <span class="ni">🔒</span> ניהול הרשאות</button>
+        </nav>
+        <div class="sb-footer">
+            <button class="btn-student-view" onclick="window.open('index.html','_blank')">👁 צפייה בדף התלמיד</button>
+            <button class="btn-logout" onclick="doLogout()">✕&nbsp;&nbsp;יציאה מהמערכת</button>
+        </div>
+    </aside>
+
+    <!-- ── Main ── -->
+    <div class="main-area">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h1>דשבורד מנהל — מב"ט בסיסי 2026</h1>
+                <p>מעקב ביצועים, ציונים וסטטוס חניכים בזמן אמת</p>
+            </div>
+            <div class="topbar-right">
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="user-pill"><div class="user-av">מ</div><span id="adminName">מנהל</span></div>
+            </div>
+        </header>
+
+        <div class="dash-body">
+
+            <!-- ══ TAB: דשבורד ══════════════════════════════════════════ -->
+            <div class="tab-panel active" id="tab-dashboard">
+                <div class="kpi-grid">
+                    <div class="kpi-card total"><div class="kpi-label">👤 סה"כ חניכים</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">רשומים במערכת</div></div>
+                    <div class="kpi-card passed"><div class="kpi-label">✅ עברו</div><div class="kpi-value" id="kpi-passed">0</div><div class="kpi-sub">ציון 80+</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-passed" style="width:0%"></div></div></div>
+                    <div class="kpi-card failed"><div class="kpi-label">❌ נכשלו</div><div class="kpi-value" id="kpi-failed">0</div><div class="kpi-sub">ציון מתחת ל-80</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-failed" style="width:0%"></div></div></div>
+                    <div class="kpi-card avg"><div class="kpi-label">📊 ממוצע</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-sub">מתוך הנבחנים</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-avg" style="width:0%"></div></div></div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-title">📉 פילוג תוצאות</div>
+                        <div class="donut-wrap">
+                            <svg width="100" height="100" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#334155" stroke-width="3.5"/>
+                                <circle id="donut-pass" cx="18" cy="18" r="15.9" fill="none" stroke="#27ae60" stroke-width="3.5" stroke-dasharray="0 100" stroke-dashoffset="25" style="transition:stroke-dasharray 1s ease;transform-origin:center;transform:rotate(-90deg)"/>
+                                <circle id="donut-fail" cx="18" cy="18" r="15.9" fill="none" stroke="#b21f1f" stroke-width="3.5" stroke-dasharray="0 100" stroke-dashoffset="25" style="transition:stroke-dasharray 1s ease;transform-origin:center;transform:rotate(-90deg)"/>
+                                <circle id="donut-pend" cx="18" cy="18" r="15.9" fill="none" stroke="#475569" stroke-width="3.5" stroke-dasharray="0 100" stroke-dashoffset="25" style="transition:stroke-dasharray 1s ease;transform-origin:center;transform:rotate(-90deg)"/>
+                            </svg>
+                            <div>
+                                <div class="legend-item"><span class="legend-dot" style="background:#27ae60"></span><span class="legend-label">עברו</span><span class="legend-val" id="leg-pass">—</span></div>
+                                <div class="legend-item"><span class="legend-dot" style="background:#b21f1f"></span><span class="legend-label">נכשלו</span><span class="legend-val" id="leg-fail">—</span></div>
+                                <div class="legend-item"><span class="legend-dot" style="background:#475569"></span><span class="legend-label">ממתינים</span><span class="legend-val" id="leg-pend">—</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">📊 התפלגות ציונים</div>
+                        <div class="bar-chart" id="barChart"></div>
+                        <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.68em;color:var(--muted);"><span>0-59</span><span>60-69</span><span>70-79</span><span>80-89</span><span>90+</span></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">⚡ מידע מהיר</div>
+                        <div class="quick-stat"><div class="qs-label">אחוז מעבר</div><div class="qs-val" style="color:var(--a)" id="qs-rate">—%</div></div>
+                        <div class="quick-stat"><div class="qs-label">ציון מקסימלי</div><div class="qs-val" style="color:var(--g)" id="qs-max">—</div></div>
+                        <div class="quick-stat"><div class="qs-label">ציון מינימלי</div><div class="qs-val" style="color:#f87171" id="qs-min">—</div></div>
+                    </div>
+                </div>
+
+                <!-- טבלה ראשית -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <div class="table-title">📋 רשימת חניכים</div>
+                        <div class="table-controls">
+                            <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" type="text" id="d-search" placeholder="חיפוש..." oninput="dashFilter()"/></div>
+                            <select class="filter-select" id="d-filter" onchange="dashFilter()"><option value="all">הכל</option><option value="passed">עברו</option><option value="failed">נכשלו</option><option value="pending">ממתינים</option></select>
+                            <button class="btn-sm btn-export" onclick="exportCSV('all')">⬇ CSV</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap"><table><thead><tr><th>#</th><th onclick="sortDash('fullName')" id="dth-fullName">שם מלא</th><th onclick="sortDash('nationalId')" id="dth-nationalId">ת.ז.</th><th onclick="sortDash('role')" id="dth-role">תפקיד</th><th onclick="sortDash('registeredAt')" id="dth-registeredAt">הרשמה</th><th onclick="sortDash('grade')" id="dth-grade">ציון</th><th>סטטוס</th></tr></thead><tbody id="dash-tbody"></tbody></table><div class="empty-state" id="dash-empty" style="display:none">🔍 לא נמצאו תוצאות.</div></div>
+                    <div class="table-footer"><div>מוצגים <span id="d-vis">0</span> מתוך <span id="d-tot">0</span></div><div class="pagination" id="d-pager"></div></div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: ניהול חניכים ════════════════════════════════════ -->
+            <div class="tab-panel" id="tab-students">
+
+                <!-- טופס הוספה -->
+                <div class="add-form-box">
+                    <div class="add-form-title">➕ הוספת חניך חדש</div>
+                    <div class="add-form-grid">
+                        <input class="form-input" type="text" id="add-fname" placeholder="שם פרטי (עברית)" maxlength="40"/>
+                        <input class="form-input" type="text" id="add-lname" placeholder="שם משפחה (עברית)" maxlength="40"/>
+                        <input class="form-input" type="text" id="add-uid"   placeholder="מספר זהות" inputmode="numeric" maxlength="12"/>
+                        <input class="form-input" type="text" id="add-role"  placeholder="תפקיד" maxlength="60"/>
+                        <input class="form-input" type="number" id="add-grade" placeholder="ציון (0-100, אופציונלי)" min="0" max="100"/>
+                    </div>
+                    <div class="add-form-actions">
+                        <button class="btn-sm btn-success" onclick="addStudent()">✔ הוסף חניך</button>
+                        <button class="btn-sm btn-primary" onclick="clearAddForm()">🔄 נקה טופס</button>
+                        <span id="add-msg" style="font-size:.8em;color:var(--g);display:none"></span>
+                    </div>
+                </div>
+
+                <!-- שורת פעולות בולק -->
+                <div class="bulk-bar hidden" id="bulk-bar">
+                    <span class="bulk-count" id="bulk-count">0 נבחרו</span>
+                    <button class="btn-sm btn-danger" onclick="deleteSelected()">🗑 מחק נבחרים</button>
+                    <button class="btn-sm btn-primary" onclick="clearSelection()">✕ בטל בחירה</button>
+                </div>
+
+                <!-- טבלת ניהול -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <div class="table-title">👥 ניהול חניכים</div>
+                        <div class="table-controls">
+                            <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" type="text" id="s-search" placeholder="חיפוש..." oninput="studentsFilter()"/></div>
+                            <select class="filter-select" id="s-filter" onchange="studentsFilter()"><option value="all">הכל</option><option value="passed">עברו</option><option value="failed">נכשלו</option><option value="pending">ממתינים</option></select>
+                            <button class="btn-sm btn-danger" onclick="confirmDeleteAll()">🗑 מחק הכל</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap"><table>
+                        <thead><tr>
+                            <th><input type="checkbox" class="cb" id="cb-all" onchange="toggleAll(this)"/></th>
+                            <th>#</th>
+                            <th onclick="sortStudents('fullName')" id="sth-fullName">שם מלא</th>
+                            <th onclick="sortStudents('nationalId')" id="sth-nationalId">ת.ז.</th>
+                            <th onclick="sortStudents('role')" id="sth-role">תפקיד</th>
+                            <th onclick="sortStudents('registeredAt')" id="sth-registeredAt">הרשמה</th>
+                            <th onclick="sortStudents('grade')" id="sth-grade">ציון</th>
+                            <th>סטטוס</th>
+                            <th>פעולות</th>
+                        </tr></thead>
+                        <tbody id="students-tbody"></tbody>
+                    </table><div class="empty-state" id="students-empty" style="display:none">🔍 לא נמצאו חניכים.</div></div>
+                    <div class="table-footer"><div>מוצגים <span id="s-vis">0</span> מתוך <span id="s-tot">0</span></div><div class="pagination" id="s-pager"></div></div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: תוצאות מבחנים ═══════════════════════════════════ -->
+            <div class="tab-panel" id="tab-results">
+                <div class="results-filters">
+                    <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" type="text" id="r-search" placeholder="חיפוש..." oninput="resultsFilter()"/></div>
+                    <select class="filter-select" id="r-filter" onchange="resultsFilter()"><option value="all">הכל</option><option value="passed">עברו</option><option value="failed">נכשלו</option><option value="pending">ממתינים</option></select>
+                    <button class="btn-sm btn-export" onclick="exportCSV('results')">⬇ ייצוא</button>
+                </div>
+                <div class="table-section">
+                    <div class="table-header"><div class="table-title">📈 תוצאות מפורטות לפי חניך</div></div>
+                    <div class="table-wrap"><table>
+                        <thead><tr>
+                            <th>#</th>
+                            <th onclick="sortResults('fullName')" id="rth-fullName">שם מלא</th>
+                            <th onclick="sortResults('nationalId')" id="rth-nationalId">ת.ז.</th>
+                            <th onclick="sortResults('storyScore')" id="rth-storyScore">גרירה 40%</th>
+                            <th onclick="sortResults('quizScore')" id="rth-quizScore">מבחן 60%</th>
+                            <th onclick="sortResults('grade')" id="rth-grade">ציון סופי</th>
+                            <th>סטטוס</th>
+                            <th>מד ציון</th>
+                        </tr></thead>
+                        <tbody id="results-tbody"></tbody>
+                    </table><div class="empty-state" id="results-empty" style="display:none">🔍 לא נמצאו תוצאות.</div></div>
+                    <div class="table-footer"><div>מוצגים <span id="r-vis">0</span> מתוך <span id="r-tot">0</span></div><div class="pagination" id="r-pager"></div></div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: הגדרות מבחן ═════════════════════════════════════ -->
+            <div class="tab-panel" id="tab-settings">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>🎯 סף מעבר וציונים</h3>
+                        <div class="setting-row"><span class="setting-label">ציון מינימום לעבור</span><input class="setting-input" type="number" id="set-pass" min="0" max="100" value="80"/></div>
+                        <div class="setting-row"><span class="setting-label">משקל גרירה (%)</span><input class="setting-input" type="number" id="set-w-story" min="0" max="100" value="40"/></div>
+                        <div class="setting-row"><span class="setting-label">משקל מבחן (%)</span><input class="setting-input" type="number" id="set-w-quiz" min="0" max="100" value="60"/></div>
+                        <button class="save-settings-btn" onclick="saveSettings()">💾 שמור הגדרות</button>
+                        <div class="settings-note">* שינוי משקלים לא יחשב מחדש ציונים שכבר נשלחו. הסך של משקל גרירה + מבחן חייב להיות 100.</div>
+                    </div>
+                    <div class="settings-card">
+                        <h3>🔧 הגדרות מערכת</h3>
+                        <div class="setting-row"><span class="setting-label">אפשר הרשמה חדשה</span><label class="toggle"><input type="checkbox" id="set-reg" checked/><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><span class="setting-label">נעל לאחר הגשה</span><label class="toggle"><input type="checkbox" id="set-lock" checked/><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><span class="setting-label">שלח לגוגל שיטס</span><label class="toggle"><input type="checkbox" id="set-sheets" checked/><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><span class="setting-label">מספר שאלות תרגול</span><input class="setting-input" type="number" id="set-practice-q" min="5" max="96" value="18"/></div>
+                        <button class="save-settings-btn" onclick="saveSettings()">💾 שמור הגדרות</button>
+                    </div>
+                    <div class="settings-card">
+                        <h3>📋 הגדרות נוכחיות</h3>
+                        <div id="settings-display" style="font-size:.84em;color:var(--soft);line-height:2;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: ייצוא דוחות ═════════════════════════════════════ -->
+            <div class="tab-panel" id="tab-export">
+                <div class="export-grid">
+                    <div class="export-card">
+                        <h3>📊 כל הנתונים — CSV</h3>
+                        <p>ייצוא טבלה מלאה עם כל פרטי החניכים: שם, ת.ז., תפקיד, ציון גרירה, ציון מבחן, ציון סופי וסטטוס. מתאים לאקסל.</p>
+                        <button class="export-btn-full" onclick="exportCSV('all')">⬇ הורד CSV מלא</button>
+                    </div>
+                    <div class="export-card">
+                        <h3>✅ רק העוברים</h3>
+                        <p>ייצוא רשימת חניכים שעברו את הסף (80+) בלבד. שימושי לאישור כניסה לקורס.</p>
+                        <button class="export-btn-full" onclick="exportCSV('passed')">⬇ הורד עוברים CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <h3>❌ רק הנכשלים</h3>
+                        <p>ייצוא רשימת חניכים שלא עברו את הסף. שימושי לפניה ממוקדת לחזרה על חומר.</p>
+                        <button class="export-btn-full" onclick="exportCSV('failed')">⬇ הורד נכשלים CSV</button>
+                    </div>
+                    <div class="export-card">
+                        <h3>📝 דוח סיכום טקסטואלי</h3>
+                        <p>סיכום מקוצר עם KPIs מרכזיים בפורמט טקסט קריא — מתאים לשליחה במייל.</p>
+                        <button class="export-btn-full" onclick="exportSummaryText()">⬇ הורד סיכום TXT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ TAB: ניהול הרשאות ════════════════════════════════════ -->
+            <div class="tab-panel" id="tab-permissions">
+                <div class="perms-card">
+                    <h3>🔒 שינוי פרטי כניסה למנהל</h3>
+                    <div class="perms-note">
+                        🛡 הפרטים נשמרים ב-localStorage של הדפדפן.<br>
+                        בסביבת ייצור יש לחבר ל-auth_store.js בצד השרת בלבד.<br>
+                        סיסמה נוכחית לצורך אימות שינוי.
+                    </div>
+                    <div class="perm-field">
+                        <label class="perm-label">שם משתמש חדש</label>
+                        <input class="perm-input" type="text" id="perm-user" placeholder="שם משתמש (לפחות 4 תווים)" autocomplete="off"/>
+                    </div>
+                    <div class="perm-field">
+                        <label class="perm-label">סיסמה נוכחית (לאימות)</label>
+                        <input class="perm-input" type="password" id="perm-old" placeholder="הסיסמה הנוכחית" autocomplete="off"/>
+                    </div>
+                    <div class="perm-field">
+                        <label class="perm-label">סיסמה חדשה</label>
+                        <input class="perm-input" type="password" id="perm-new" placeholder="לפחות 8 תווים" autocomplete="off"/>
+                    </div>
+                    <div class="perm-field">
+                        <label class="perm-label">אישור סיסמה חדשה</label>
+                        <input class="perm-input" type="password" id="perm-new2" placeholder="חזור על הסיסמה" autocomplete="off"/>
+                        <div class="perm-error" id="perm-err"></div>
+                        <div class="perm-success" id="perm-ok">✓ הפרטים עודכנו בהצלחה!</div>
+                    </div>
+                    <button class="save-settings-btn" onclick="savePermissions()">🔐 עדכן פרטי כניסה</button>
+                    <div class="settings-note" style="margin-top:14px">
+                        פרטי ברירת מחדל: שם משתמש <b style="color:var(--a)">admin</b> | סיסמה <b style="color:var(--a)">Mabat2026</b>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /dash-body -->
+    </div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+// ── מפתחות localStorage ──────────────────────────────────────────────────
+const STORAGE_STUDENTS = 'mabatim_students_db';
+const STORAGE_ADMIN    = 'mabatim_admin_creds';
+const STORAGE_SETTINGS = 'mabatim_settings';
+
+// ── בדיקת הרשאות ────────────────────────────────────────────────────────
+window.onload = function() {
+    if (!localStorage.getItem('mabatim_admin_session')) {
+        window.location.href = 'index.html'; return;
+    }
+    loadSettings();
+    renderSettingsDisplay();
+    const creds = getAdminCreds();
+    document.getElementById('adminName').textContent  = creds.username;
+    document.getElementById('perm-user').value        = creds.username;
+    startClock();
+    initTabs();
+    refreshAll();
+};
+
+function doLogout() {
+    localStorage.removeItem('mabatim_admin_session');
+    window.location.href = 'index.html';
+}
+
+// ── אישורי מנהל ─────────────────────────────────────────────────────────
+function getAdminCreds() {
+    try { const s = localStorage.getItem(STORAGE_ADMIN); if(s) return JSON.parse(s); } catch(e){}
+    return { username:'admin', password:'Mabat2026' };
+}
+
+// ── הגדרות ──────────────────────────────────────────────────────────────
+const DEFAULT_SETTINGS = { passThreshold:80, wStory:40, wQuiz:60, allowReg:true, lockAfterSubmit:true, sendSheets:true, practiceQ:18 };
+let settings = { ...DEFAULT_SETTINGS };
+
+function loadSettings() {
+    try { const s = localStorage.getItem(STORAGE_SETTINGS); if(s) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(s) }; } catch(e){}
+    document.getElementById('set-pass').value      = settings.passThreshold;
+    document.getElementById('set-w-story').value   = settings.wStory;
+    document.getElementById('set-w-quiz').value    = settings.wQuiz;
+    document.getElementById('set-reg').checked     = settings.allowReg;
+    document.getElementById('set-lock').checked    = settings.lockAfterSubmit;
+    document.getElementById('set-sheets').checked  = settings.sendSheets;
+    document.getElementById('set-practice-q').value = settings.practiceQ;
+}
+
+function saveSettings() {
+    const wS = parseInt(document.getElementById('set-w-story').value)||40;
+    const wQ = parseInt(document.getElementById('set-w-quiz').value)||60;
+    if (wS + wQ !== 100) { showToast('⚠️ משקל גרירה + מבחן חייב להיות 100', 'err'); return; }
+    settings = {
+        passThreshold: parseInt(document.getElementById('set-pass').value)||80,
+        wStory: wS, wQuiz: wQ,
+        allowReg: document.getElementById('set-reg').checked,
+        lockAfterSubmit: document.getElementById('set-lock').checked,
+        sendSheets: document.getElementById('set-sheets').checked,
+        practiceQ: parseInt(document.getElementById('set-practice-q').value)||18
+    };
+    localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
+    renderSettingsDisplay();
+    showToast('✓ ההגדרות נשמרו', 'ok');
+    refreshAll();
+}
+
+function renderSettingsDisplay() {
+    document.getElementById('settings-display').innerHTML =
+        `<div>סף מעבר: <b style="color:var(--a)">${settings.passThreshold}</b></div>` +
+        `<div>משקל גרירה: <b style="color:var(--a)">${settings.wStory}%</b></div>` +
+        `<div>משקל מבחן: <b style="color:var(--a)">${settings.wQuiz}%</b></div>` +
+        `<div>הרשמה פתוחה: <b style="color:${settings.allowReg?'var(--g)':'#f87171'}">${settings.allowReg?'כן':'לא'}</b></div>` +
+        `<div>נעילה אחרי הגשה: <b style="color:var(--a)">${settings.lockAfterSubmit?'כן':'לא'}</b></div>` +
+        `<div>שאלות תרגול: <b style="color:var(--a)">${settings.practiceQ}</b></div>`;
+}
+
+// ── DB חניכים ────────────────────────────────────────────────────────────
+function getStudents() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_STUDENTS)||'[]'); } catch(e){ return []; }
+}
+function setStudents(arr) {
+    localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(arr));
+}
+function passStatus(s) {
+    if (s.grade === null || s.grade === undefined) return 'pending';
+    return s.grade >= settings.passThreshold ? 'pass' : 'fail';
+}
+
+// ── רענון כל הלשוניות ───────────────────────────────────────────────────
+function refreshAll() {
+    updateKPIs();
+    dashFilter();
+    studentsFilter();
+    resultsFilter();
+}
+
+// ── שעון ────────────────────────────────────────────────────────────────
+function startClock() {
+    const tick = () => {
+        const n = new Date();
+        document.getElementById('clock').textContent =
+            String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+    };
+    tick(); setInterval(tick, 1000);
+}
+
+// ── ניווט לשוניות ────────────────────────────────────────────────────────
+function initTabs() {
+    document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('tab-'+tab).classList.add('active');
+        });
+    });
+}
+
+// ── KPI ─────────────────────────────────────────────────────────────────
+function updateKPIs() {
+    const all     = getStudents();
+    const graded  = all.filter(s => s.grade!==null && s.grade!==undefined);
+    const passed  = all.filter(s => passStatus(s)==='pass');
+    const failed  = all.filter(s => passStatus(s)==='fail');
+    const pending = all.filter(s => passStatus(s)==='pending');
+    const total   = all.length;
+    const avg     = graded.length ? Math.round(graded.reduce((a,s)=>a+s.grade,0)/graded.length) : null;
+    const maxG    = graded.length ? Math.max(...graded.map(s=>s.grade)) : null;
+    const minG    = graded.length ? Math.min(...graded.map(s=>s.grade)) : null;
+
+    animNum('kpi-total',  total);
+    animNum('kpi-passed', passed.length);
+    animNum('kpi-failed', failed.length);
+    document.getElementById('kpi-avg').textContent = avg??'—';
+
+    const pct = n => total ? Math.round(n/total*100) : 0;
+    setTimeout(()=>{
+        setW('bar-passed', pct(passed.length));
+        setW('bar-failed', pct(failed.length));
+        setW('bar-avg',    avg??0);
+        drawDonut(passed.length, failed.length, pending.length, total);
+        buildBars(graded);
+    }, 400);
+
+    document.getElementById('leg-pass').textContent = passed.length;
+    document.getElementById('leg-fail').textContent = failed.length;
+    document.getElementById('leg-pend').textContent = pending.length;
+    document.getElementById('qs-rate').textContent  = total ? Math.round(passed.length/total*100)+'%' : '—%';
+    document.getElementById('qs-max').textContent   = maxG??'—';
+    document.getElementById('qs-min').textContent   = minG??'—';
+}
+
+function animNum(id, to) {
+    const el = document.getElementById(id);
+    let cur = 0; const step = Math.max(1, Math.ceil(to/20));
+    const t = setInterval(()=>{ cur+=step; if(cur>=to){el.textContent=to;clearInterval(t);}else{el.textContent=cur;} }, 30);
+}
+function setW(id,pct){ document.getElementById(id).style.width=Math.min(pct,100)+'%'; }
+
+function drawDonut(pass, fail, pend, total) {
+    if (!total) return;
+    const pP=pass/total*100, fP=fail/total*100, nP=pend/total*100;
+    let off=25;
+    setSeg('donut-pass',pP,off); off-=pP;
+    setSeg('donut-fail',fP,off); off-=fP;
+    setSeg('donut-pend',nP,off);
+}
+function setSeg(id,pct,off) {
+    const el=document.getElementById(id);
+    el.setAttribute('stroke-dasharray',pct+' '+(100-pct));
+    el.setAttribute('stroke-dashoffset',off);
+}
+
+function buildBars(graded) {
+    const bins=[0,0,0,0,0];
+    graded.forEach(s=>{
+        if(s.grade>=90)bins[4]++;
+        else if(s.grade>=80)bins[3]++;
+        else if(s.grade>=70)bins[2]++;
+        else if(s.grade>=60)bins[1]++;
+        else bins[0]++;
+    });
+    const mx=Math.max(...bins,1);
+    const clr=['#b21f1f','#e67e22','#f39c12','#27ae60','#fdbb2d'];
+    document.getElementById('barChart').innerHTML=bins.map((v,i)=>{
+        const h=Math.round((v/mx)*72);
+        return `<div class="bar-col"><div style="color:var(--muted);font-size:.65em">${v}</div><div class="bar-col-inner" style="height:${h}px;background:${clr[i]}"></div></div>`;
+    }).join('');
+}
+
+// ── הוספת חניך ─────────────────────────────────────────────────────────
+function addStudent() {
+    const fn    = document.getElementById('add-fname').value.trim();
+    const ln    = document.getElementById('add-lname').value.trim();
+    const uid   = document.getElementById('add-uid').value.trim();
+    const role  = document.getElementById('add-role').value.trim();
+    const gradeRaw = document.getElementById('add-grade').value.trim();
+    const grade = gradeRaw !== '' ? parseInt(gradeRaw) : null;
+
+    if (!fn || !ln) { showToast('⚠️ שם פרטי ושם משפחה חובה', 'err'); return; }
+    if (!uid || !/^\d{5,12}$/.test(uid)) { showToast('⚠️ מספר זהות לא תקין (5-12 ספרות)', 'err'); return; }
+    if (grade !== null && (isNaN(grade) || grade<0 || grade>100)) { showToast('⚠️ ציון חייב להיות בין 0 ל-100', 'err'); return; }
+
+    let students = getStudents();
+    const exists = students.find(s => s.nationalId === uid);
+    if (exists) { showToast('⚠️ ת.ז. כבר קיימת במערכת', 'err'); return; }
+
+    const rec = {
+        id: 'stu_'+uid,
+        fullName: fn+' '+ln,
+        nationalId: uid,
+        role: role||'',
+        grade: grade,
+        storyScore: null,
+        quizScore:  null,
+        registeredAt: new Date().toLocaleDateString('he-IL'),
+        submittedAt: grade!==null ? new Date().toISOString() : null,
+        isManual: true
+    };
+    students.push(rec);
+    setStudents(students);
+    clearAddForm();
+    showToast('✓ החניך נוסף בהצלחה', 'ok');
+    refreshAll();
+}
+
+function clearAddForm() {
+    ['add-fname','add-lname','add-uid','add-role','add-grade'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ── מחיקה ────────────────────────────────────────────────────────────────
+let confirmCallback = null;
+
+function showConfirm(title, msg, cb) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent   = msg;
+    document.getElementById('confirmOverlay').classList.add('open');
+    confirmCallback = cb;
+    document.getElementById('confirmYes').onclick = () => { closeConfirm(); cb(); };
+}
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+
+function deleteSelected() {
+    const checked = Array.from(document.querySelectorAll('.row-cb:checked')).map(cb=>cb.value);
+    if (!checked.length) return;
+    showConfirm('אישור מחיקה', `האם למחוק ${checked.length} חניכים?`, () => {
+        let students = getStudents().filter(s => !checked.includes(s.nationalId));
+        setStudents(students);
+        clearSelection();
+        showToast(`✓ ${checked.length} חניכים נמחקו`, 'ok');
+        refreshAll();
+    });
+}
+
+function deleteSingle(uid) {
+    const students = getStudents();
+    const s = students.find(x=>x.nationalId===uid);
+    if (!s) return;
+    showConfirm('מחיקת חניך', `למחוק את ${s.fullName}?`, () => {
+        setStudents(students.filter(x=>x.nationalId!==uid));
+        showToast('✓ החניך נמחק', 'ok');
+        refreshAll();
+    });
+}
+
+function confirmDeleteAll() {
+    const students = getStudents();
+    if (!students.length) { showToast('אין חניכים למחיקה', 'err'); return; }
+    showConfirm('מחיקת כל הנתונים', `למחוק את כל ${students.length} החניכים? פעולה זו בלתי הפיכה.`, () => {
+        setStudents([]);
+        clearSelection();
+        showToast('✓ כל הנתונים נמחקו', 'ok');
+        refreshAll();
+    });
+}
+
+// ── בחירת שורות ─────────────────────────────────────────────────────────
+function toggleAll(master) {
+    document.querySelectorAll('.row-cb').forEach(cb => cb.checked = master.checked);
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    const count = document.querySelectorAll('.row-cb:checked').length;
+    const bar   = document.getElementById('bulk-bar');
+    if (count > 0) {
+        bar.classList.remove('hidden');
+        document.getElementById('bulk-count').textContent = count + ' נבחרו';
+    } else {
+        bar.classList.add('hidden');
+    }
+}
+
+function clearSelection() {
+    document.querySelectorAll('.row-cb,.cb').forEach(cb=>cb.checked=false);
+    document.getElementById('bulk-bar').classList.add('hidden');
+}
+
+// ── מיון ─────────────────────────────────────────────────────────────────
+let dashState   = { key:'grade', dir:'desc', filtered:[] };
+let studState   = { key:'grade', dir:'desc', filtered:[] };
+let resState    = { key:'grade', dir:'desc', filtered:[] };
+
+function makeSorter(stateObj, prefix, renderFn) {
+    return function(key) {
+        stateObj.dir = (stateObj.key===key && stateObj.dir==='desc') ? 'asc' : 'desc';
+        stateObj.key = key;
+        document.querySelectorAll('th[id^="'+prefix+'"]').forEach(th=>{
+            th.classList.remove('sorted');
+            const a=th.querySelector('.sort-arr'); if(a) a.remove();
+        });
+        const th = document.getElementById(prefix+key);
+        if (th) { th.classList.add('sorted'); th.insertAdjacentHTML('beforeend',`<span class="sort-arr">${stateObj.dir==='asc'?'▲':'▼'}</span>`); }
+        sortArr(stateObj);
+        renderFn();
+    };
+}
+
+const sortDash     = makeSorter(dashState, 'dth-', ()=>renderDash());
+const sortStudents = makeSorter(studState, 'sth-', ()=>renderStudents());
+const sortResults  = makeSorter(resState,  'rth-', ()=>renderResults());
+
+function sortArr(st) {
+    st.filtered.sort((a,b)=>{
+        let va=a[st.key], vb=b[st.key];
+        if(va===null||va===undefined) va=st.dir==='asc'?Infinity:-Infinity;
+        if(vb===null||vb===undefined) vb=st.dir==='asc'?Infinity:-Infinity;
+        if(typeof va==='string') return st.dir==='asc'?va.localeCompare(vb,'he'):vb.localeCompare(va,'he');
+        return st.dir==='asc'?va-vb:vb-va;
+    });
+}
+
+// ── פילטרים ──────────────────────────────────────────────────────────────
+function applyFilter(arr, q, f) {
+    return arr.filter(s => {
+        const mq = !q || s.fullName.includes(q) || s.nationalId.includes(q) || (s.role||'').includes(q);
+        const st = passStatus(s);
+        const mf = f==='all' || (f==='passed'&&st==='pass') || (f==='failed'&&st==='fail') || (f==='pending'&&st==='pending');
+        return mq && mf;
+    });
+}
+
+let dashPage=1, studPage=1, resPage=1;
+const PAGE=10;
+
+function dashFilter() {
+    const q=document.getElementById('d-search').value.trim().toLowerCase();
+    const f=document.getElementById('d-filter').value;
+    dashState.filtered = applyFilter(getStudents(), q, f);
+    sortArr(dashState); dashPage=1; renderDash();
+}
+function studentsFilter() {
+    const q=document.getElementById('s-search').value.trim().toLowerCase();
+    const f=document.getElementById('s-filter').value;
+    studState.filtered = applyFilter(getStudents(), q, f);
+    sortArr(studState); studPage=1; renderStudents();
+}
+function resultsFilter() {
+    const q=document.getElementById('r-search').value.trim().toLowerCase();
+    const f=document.getElementById('r-filter').value;
+    resState.filtered = applyFilter(getStudents(), q, f);
+    sortArr(resState); resPage=1; renderResults();
+}
+
+// ── render helpers ───────────────────────────────────────────────────────
+function pillandBadge(s) {
+    const st = passStatus(s);
+    const g  = s.grade;
+    const pill = st==='pending'
+        ? `<span class="grade-pill pending">—</span>`
+        : `<span class="grade-pill ${st==='pass'?'pass':'fail'}">${g}</span>`;
+    const badge = st==='pending'
+        ? `<span class="status-badge pending"><span class="sdot"></span>ממתין</span>`
+        : st==='pass'
+            ? `<span class="status-badge pass"><span class="sdot"></span>עבר ✓</span>`
+            : `<span class="status-badge fail"><span class="sdot"></span>נכשל ✗</span>`;
+    return { pill, badge };
+}
+
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderPager(total, page, setPage, pagerId) {
+    const pages = Math.ceil(total/PAGE);
+    const pg = document.getElementById(pagerId);
+    if (pages<=1) { pg.innerHTML=''; return; }
+    pg.innerHTML = Array.from({length:pages},(_,i)=>i+1)
+        .map(p=>`<button class="page-btn ${p===page?'active':''}" onclick="${setPage}(${p})">${p}</button>`)
+        .join('');
+}
+
+// ── דשבורד טבלה ──────────────────────────────────────────────────────────
+function renderDash() {
+    const arr   = dashState.filtered;
+    const total = arr.length;
+    const slice = arr.slice((dashPage-1)*PAGE, dashPage*PAGE);
+    document.getElementById('d-vis').textContent = total;
+    document.getElementById('d-tot').textContent = getStudents().length;
+    const empty = document.getElementById('dash-empty');
+    if (!slice.length) { document.getElementById('dash-tbody').innerHTML=''; empty.style.display='block'; renderPager(total,dashPage,'setDashPage','d-pager'); return; }
+    empty.style.display='none';
+    document.getElementById('dash-tbody').innerHTML = slice.map((s,i)=>{
+        const { pill, badge } = pillandBadge(s);
+        return `<tr><td>${(dashPage-1)*PAGE+i+1}</td><td class="td-name">${esc(s.fullName)}</td><td class="td-id">${esc(s.nationalId)}</td><td>${esc(s.role||'—')}</td><td class="td-date">${esc(s.registeredAt||'—')}</td><td>${pill}</td><td>${badge}</td></tr>`;
+    }).join('');
+    renderPager(total, dashPage, 'setDashPage', 'd-pager');
+}
+function setDashPage(p){ dashPage=p; renderDash(); }
+
+// ── ניהול חניכים טבלה ────────────────────────────────────────────────────
+function renderStudents() {
+    const arr   = studState.filtered;
+    const total = arr.length;
+    const slice = arr.slice((studPage-1)*PAGE, studPage*PAGE);
+    document.getElementById('s-vis').textContent = total;
+    document.getElementById('s-tot').textContent = getStudents().length;
+    const empty = document.getElementById('students-empty');
+    if (!slice.length) { document.getElementById('students-tbody').innerHTML=''; empty.style.display='block'; renderPager(total,studPage,'setStudPage','s-pager'); return; }
+    empty.style.display='none';
+    document.getElementById('students-tbody').innerHTML = slice.map((s,i)=>{
+        const { pill, badge } = pillandBadge(s);
+        return `<tr>
+            <td><input type="checkbox" class="cb row-cb" value="${esc(s.nationalId)}" onchange="updateBulkBar()"/></td>
+            <td>${(studPage-1)*PAGE+i+1}</td>
+            <td class="td-name">${esc(s.fullName)}</td>
+            <td class="td-id">${esc(s.nationalId)}</td>
+            <td>${esc(s.role||'—')}</td>
+            <td class="td-date">${esc(s.registeredAt||'—')}</td>
+            <td>${pill}</td>
+            <td>${badge}</td>
+            <td><button class="btn-sm btn-danger" onclick="deleteSingle('${esc(s.nationalId)}')" style="padding:4px 9px;font-size:.75em">🗑</button></td>
+        </tr>`;
+    }).join('');
+    renderPager(total, studPage, 'setStudPage', 's-pager');
+}
+function setStudPage(p){ studPage=p; renderStudents(); }
+
+// ── תוצאות מבחנים ────────────────────────────────────────────────────────
+function renderResults() {
+    const arr   = resState.filtered;
+    const total = arr.length;
+    const slice = arr.slice((resPage-1)*PAGE, resPage*PAGE);
+    document.getElementById('r-vis').textContent = total;
+    document.getElementById('r-tot').textContent = getStudents().length;
+    const empty = document.getElementById('results-empty');
+    if (!slice.length) { document.getElementById('results-tbody').innerHTML=''; empty.style.display='block'; renderPager(total,resPage,'setResPage','r-pager'); return; }
+    empty.style.display='none';
+    document.getElementById('results-tbody').innerHTML = slice.map((s,i)=>{
+        const { badge } = pillandBadge(s);
+        const story = s.storyScore!==null&&s.storyScore!==undefined ? s.storyScore : '—';
+        const quiz  = s.quizScore!==null&&s.quizScore!==undefined   ? s.quizScore  : '—';
+        const total_s = s.grade!==null&&s.grade!==undefined ? s.grade : '—';
+        const barPct  = s.grade!==null ? s.grade : 0;
+        const barClr  = s.grade>=settings.passThreshold ? '#27ae60' : s.grade>=60 ? '#f39c12' : '#b21f1f';
+        const pilType = passStatus(s)==='pass'?'pass':passStatus(s)==='fail'?'fail':'pending';
+        return `<tr>
+            <td>${(resPage-1)*PAGE+i+1}</td>
+            <td class="td-name">${esc(s.fullName)}</td>
+            <td class="td-id">${esc(s.nationalId)}</td>
+            <td>${typeof story==='number'?`<span class="grade-pill ${story>=settings.wStory?'pass':'fail'}">${story}</span>`:story}</td>
+            <td>${typeof quiz==='number'?`<span class="grade-pill ${quiz>=settings.wQuiz?'pass':'fail'}">${quiz}</span>`:quiz}</td>
+            <td><span class="grade-pill ${pilType}">${total_s}</span></td>
+            <td>${badge}</td>
+            <td><div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:${barPct}%;background:${barClr}"></div></div><span style="font-size:.72em;color:var(--muted)">${barPct}%</span></div></td>
+        </tr>`;
+    }).join('');
+    renderPager(total, resPage, 'setResPage', 'r-pager');
+}
+function setResPage(p){ resPage=p; renderResults(); }
+
+// ── ייצוא CSV ───────────────────────────────────────────────────────────
+function exportCSV(mode) {
+    let data = getStudents();
+    let filename = 'mabatim_all.csv';
+    if (mode==='passed') { data=data.filter(s=>passStatus(s)==='pass'); filename='mabatim_passed.csv'; }
+    if (mode==='failed') { data=data.filter(s=>passStatus(s)==='fail'); filename='mabatim_failed.csv'; }
+    if (mode==='results') { filename='mabatim_results.csv'; }
+
+    const hdrs = ['#','שם מלא','ת.ז.','תפקיד','תאריך הרשמה','גרירה','מבחן','ציון','סטטוס'];
+    const rows = data.map((s,i)=>[
+        i+1, s.fullName, s.nationalId, s.role||'—', s.registeredAt||'—',
+        s.storyScore??'—', s.quizScore??'—', s.grade??'ממתין',
+        passStatus(s)==='pass'?'עבר':passStatus(s)==='fail'?'נכשל':'ממתין'
+    ]);
+    const csv  = [hdrs,...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+    dlFile('\uFEFF'+csv, filename, 'text/csv;charset=utf-8;');
+    showToast('✓ קובץ CSV הורד', 'ok');
+}
+
+function exportSummaryText() {
+    const all=getStudents(), passed=all.filter(s=>passStatus(s)==='pass'), failed=all.filter(s=>passStatus(s)==='fail');
+    const graded=all.filter(s=>s.grade!==null), avg=graded.length?Math.round(graded.reduce((a,s)=>a+s.grade,0)/graded.length):0;
+    const txt = [
+        '=== דוח סיכום מב"ט בסיסי 2026 ===',
+        `תאריך: ${new Date().toLocaleDateString('he-IL')}`,
+        '',
+        `סה"כ חניכים רשומים: ${all.length}`,
+        `עברו (ציון ${settings.passThreshold}+): ${passed.length}`,
+        `נכשלו: ${failed.length}`,
+        `ממתינים: ${all.length-passed.length-failed.length}`,
+        `ממוצע ציון: ${avg}`,
+        `אחוז מעבר: ${all.length?Math.round(passed.length/all.length*100):0}%`,
+        '',
+        '=== רשימת עוברים ===',
+        ...passed.map(s=>`${s.fullName} | ${s.nationalId} | ${s.grade}`)
+    ].join('\n');
+    dlFile(txt, 'mabatim_summary.txt', 'text/plain;charset=utf-8;');
+    showToast('✓ קובץ סיכום הורד', 'ok');
+}
+
+function dlFile(content, filename, type) {
+    const blob = new Blob([content],{type});
+    const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:filename});
+    a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ── שינוי הרשאות ────────────────────────────────────────────────────────
+function savePermissions() {
+    const newUser = document.getElementById('perm-user').value.trim();
+    const oldPass = document.getElementById('perm-old').value;
+    const newPass = document.getElementById('perm-new').value;
+    const newPass2= document.getElementById('perm-new2').value;
+    const errEl   = document.getElementById('perm-err');
+    const okEl    = document.getElementById('perm-ok');
+    errEl.style.display='none'; okEl.style.display='none';
+
+    const creds = getAdminCreds();
+    if (oldPass !== creds.password) { errEl.textContent='הסיסמה הנוכחית שגויה.'; errEl.style.display='block'; return; }
+    if (newUser.length < 4) { errEl.textContent='שם משתמש חייב להכיל לפחות 4 תווים.'; errEl.style.display='block'; return; }
+    if (newPass && newPass.length < 8) { errEl.textContent='סיסמה חדשה חייבת להכיל לפחות 8 תווים.'; errEl.style.display='block'; return; }
+    if (newPass && newPass !== newPass2) { errEl.textContent='הסיסמאות החדשות אינן תואמות.'; errEl.style.display='block'; return; }
+
+    const updated = { username: newUser, password: newPass||creds.password };
+    localStorage.setItem(STORAGE_ADMIN, JSON.stringify(updated));
+    document.getElementById('adminName').textContent = newUser;
+    document.getElementById('perm-old').value='';
+    document.getElementById('perm-new').value='';
+    document.getElementById('perm-new2').value='';
+    okEl.style.display='block';
+    showToast('✓ פרטי הכניסה עודכנו', 'ok');
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg, type='ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show ' + type;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
