@@ -143,10 +143,48 @@
         @media (max-width: 380px) {
             body[data-device="mobile"] .dict-grid { grid-template-columns: 1fr; }
         }
+        /* ── כניסת מנהל ── */
+        .admin-fab { position: fixed; bottom: 20px; left: 20px; z-index: 900; background: rgba(15,23,42,0.85); border: 1px solid rgba(253,187,45,0.4); color: #fdbb2d; padding: 8px 15px; border-radius: 999px; font-family: inherit; font-size: 0.8em; font-weight: 700; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(8px); }
+        .admin-fab:hover { background: rgba(253,187,45,0.18); box-shadow: 0 0 14px rgba(253,187,45,0.3); }
+        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.78); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 16px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #1e293b; border: 1px solid #334155; border-top: 3px solid #fdbb2d; border-radius: 16px; padding: 30px 26px; width: 100%; max-width: 350px; position: relative; box-sizing: border-box; }
+        .modal-title { font-size: 1.05em; font-weight: 700; color: #fdbb2d; margin-bottom: 3px; }
+        .modal-sub { font-size: 0.8em; color: #94a3b8; margin-bottom: 20px; }
+        .modal-close { position: absolute; top: 12px; left: 14px; background: transparent; border: none; color: #94a3b8; font-size: 1.15em; cursor: pointer; }
+        .modal-close:hover { color: #e2e8f0; }
+        .modal-label { font-size: 0.78em; font-weight: 700; color: #94a3b8; margin-bottom: 5px; display: block; }
+        .modal-group { margin-bottom: 13px; }
+        .modal-input { background: #334155; border: 1px solid #475569; color: white; padding: 11px 13px; border-radius: 8px; outline: none; width: 100%; box-sizing: border-box; font-size: 0.95em; font-family: inherit; }
+        .modal-input:focus { border-color: #fdbb2d; }
+        .modal-error { color: #f87171; font-size: 0.82em; margin-top: 6px; display: none; }
+        .btn-admin-login { width: 100%; padding: 11px; background: linear-gradient(135deg, #92400e, #fdbb2d); border: none; border-radius: 8px; color: #0f172a; font-family: inherit; font-size: 0.95em; font-weight: 700; cursor: pointer; margin-top: 2px; }
+        .btn-admin-login:hover { opacity: 0.88; }
+        body[data-device="mobile"] .admin-fab { bottom: 10px; left: 10px; padding: 6px 11px; font-size: 0.72em; }
         [hidden] { display: none !important; }
     </style>
 </head>
 <body>
+
+<button type="button" class="admin-fab" id="adminFab">🔒 כניסת מנהל</button>
+
+<div class="modal-overlay" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+    <div class="modal-box">
+        <button type="button" class="modal-close" id="adminClose" aria-label="סגירה">✕</button>
+        <div class="modal-title" id="adminModalTitle">כניסת מנהל מערכת</div>
+        <div class="modal-sub">AUTHORIZED PERSONNEL ONLY</div>
+        <div class="modal-group">
+            <label class="modal-label" for="adminUser">שם משתמש</label>
+            <input class="modal-input" type="text" id="adminUser" autocomplete="off" dir="ltr">
+        </div>
+        <div class="modal-group">
+            <label class="modal-label" for="adminPass">סיסמה</label>
+            <input class="modal-input" type="password" id="adminPass" autocomplete="off" dir="ltr">
+            <div class="modal-error" id="adminErr">שם משתמש או סיסמה שגויים.</div>
+        </div>
+        <button type="button" class="btn-admin-login" id="adminLoginBtn">כניסה לדשבורד</button>
+    </div>
+</div>
 
 <div class="container">
     <section id="pageLearn" aria-label="לימוד ומילון">
@@ -164,7 +202,7 @@
                 </div>
                 <div class="stat-card">
                     <b>מסלול בחינה מובנה</b>
-                    <span>משימות ההשלמה מהוות 40% מהציון והמבחן המסכם 60% נוספים. ציון עובר: 80.</span>
+                    <span>משימות ההשלמה מהוות <span class="w-story">40</span>% מהציון והמבחן המסכם <span class="w-quiz">60</span>% נוספים. ציון עובר: <span class="w-pass">80</span>.</span>
                 </div>
                 <div class="stat-card">
                     <b>ללא חזרה אחורה</b>
@@ -198,7 +236,7 @@
     <section id="pagePractice" hidden aria-label="תרגול מונחים">
         <div class="header">
             <h1>מילון מונחים: מב"ט בסיסי</h1>
-            <p>בחר את ההגדרה הנכונה לכל מונח. בכל סבב נבחרים 18 מונחים אקראיים.</p>
+            <p>בחר את ההגדרה הנכונה לכל מונח. בכל סבב נבחרים <span class="w-practice">18</span> מונחים אקראיים.</p>
         </div>
 
         <div class="practice-wrap">
@@ -226,13 +264,13 @@
     <section id="pageExam" hidden aria-label="מבחן">
         <div class="header">
             <h1>מבחן הסמכה — מב"ט בסיסי</h1>
-            <p>משימות השלמה (40%) | מבחן מסכם (60%) | ציון עובר: 80</p>
+            <p>משימות השלמה (<span class="w-story">40</span>%) | מבחן מסכם (<span class="w-quiz">60</span>%) | ציון עובר: <span class="w-pass">80</span></p>
         </div>
 
         <div id="regSummary" class="reg-summary"></div>
         <div class="exam-progress" id="examProgress"></div>
 
-        <h2 style="color: var(--a);">🕵️ משימות השלמה (40%)</h2>
+        <h2 style="color: var(--a);">🕵️ משימות השלמה (<span class="w-story">40</span>%)</h2>
         <p class="exam-hint">בכל מקום חסר בטקסט מוצגות 3 אפשרויות. לחץ על המונח הנכון. אפשר לשנות בחירה עד להגשה. הציון מחושב רק בהגשה הסופית.</p>
 
         <div class="story-box" id="s1">
@@ -259,7 +297,7 @@
             <div class="stage-progress" id="p4"></div>
         </div>
 
-        <h2 style="color: var(--a);">📝 מבחן מסכם (60%)</h2>
+        <h2 style="color: var(--a);">📝 מבחן מסכם (<span class="w-quiz">60</span>%)</h2>
         <p class="exam-hint">לכל שאלה סמן תשובה אחת בלבד. בסיום לחץ על הכפתור הירוק למטה כדי להגיש ולשדר את הציון.</p>
         <div id="quizArea"></div>
 
@@ -275,13 +313,125 @@
     const STORAGE_STATE = 'rayMabatExamState';
     const STORAGE_RESULT = 'rayMabatResult';
 
-    const PASS_MARK = 80;
-    const STORY_WEIGHT = 0.4;
-    const QUIZ_WEIGHT = 0.6;
-    const SEND_TIMEOUT_MS = 15000;
+    // משותף עם admin.html — אל תשנה שמות מפתחות בלי לשנות גם שם
+    const STORAGE_STUDENTS = 'mabatim_students_db';
+    const STORAGE_SETTINGS = 'mabatim_settings';
+    const STORAGE_ADMIN_CREDS = 'mabatim_admin_creds';
+    const ADMIN_SESSION = 'mabatim_admin_session';
+    const DEFAULT_ADMIN = { username: 'admin', hash: '031682ccc7b1cc0f246e8be3a2e1dd5dc4fd7c34408d63885b010272b3acd8b4' };
+    const DEFAULT_SETTINGS = { passThreshold: 80, wStory: 40, wQuiz: 60, allowReg: true, sendSheets: true, practiceQ: 18 };
+
+    const SEND_TIMEOUT_MS = 30000;
 
     // Apps Script Web App URL only — do not put the Google Sheet link here; keep the sheet private in Drive.
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyW7D5yfZL1iJhy4wi-aM4QwYmMi5IXHYxVLleuLc7-XRdPEQZe0vGRZuXXAlZihAUm/exec';
+
+    /** הגדרות שהמנהל שומר ב-admin.html. תקפות רק בדפדפן שבו נשמרו. */
+    function loadSettings() {
+        let s = {};
+        try { s = JSON.parse(localStorage.getItem(STORAGE_SETTINGS) || '{}') || {}; } catch (e) { s = {}; }
+        const c = Object.assign({}, DEFAULT_SETTINGS, s);
+        const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v) : d; };
+        c.passThreshold = num(c.passThreshold, 0, 100, 80);
+        c.wStory = num(c.wStory, 0, 100, 40);
+        c.wQuiz = num(c.wQuiz, 0, 100, 60);
+        if (c.wStory + c.wQuiz !== 100) { c.wStory = 40; c.wQuiz = 60; }
+        c.practiceQ = num(c.practiceQ, 5, 200, 18);
+        c.allowReg = c.allowReg !== false;
+        c.sendSheets = c.sendSheets !== false;
+        return c;
+    }
+    const CFG = loadSettings();
+
+    function applySettingsToPage() {
+        const set = (cls, v) => document.querySelectorAll('.' + cls).forEach(el => { el.textContent = v; });
+        set('w-story', CFG.wStory);
+        set('w-quiz', CFG.wQuiz);
+        set('w-pass', CFG.passThreshold);
+        set('w-practice', Math.min(CFG.practiceQ, allGlossaryTerms().length));
+    }
+
+    // ── SHA-256 (לסיסמת המנהל; לא נשמרת בטקסט גלוי) ──────────────────────
+    function sha256Hex(str) {
+        const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+        const bytes = new TextEncoder().encode(str);
+        const len = bytes.length, padded = ((len + 9 + 63) >> 6) << 6;
+        const buf = new Uint8Array(padded); buf.set(bytes); buf[len] = 0x80;
+        const dv = new DataView(buf.buffer);
+        dv.setUint32(padded - 4, (len * 8) >>> 0); dv.setUint32(padded - 8, Math.floor(len / 0x20000000));
+        let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+        const W = new Uint32Array(64), r = (x, n) => (x >>> n) | (x << (32 - n));
+        for (let o = 0; o < padded; o += 64) {
+            for (let i = 0; i < 16; i++) W[i] = dv.getUint32(o + i * 4);
+            for (let i = 16; i < 64; i++) W[i] = (W[i-16] + (r(W[i-15],7) ^ r(W[i-15],18) ^ (W[i-15] >>> 3)) + W[i-7] + (r(W[i-2],17) ^ r(W[i-2],19) ^ (W[i-2] >>> 10))) >>> 0;
+            let [a, b, c, d, e, f, g, h] = H;
+            for (let i = 0; i < 64; i++) {
+                const t1 = (h + (r(e,6) ^ r(e,11) ^ r(e,25)) + ((e & f) ^ (~e & g)) + K[i] + W[i]) >>> 0;
+                const t2 = ((r(a,2) ^ r(a,13) ^ r(a,22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+                h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+            }
+            H = H.map((x, i) => (x + [a, b, c, d, e, f, g, h][i]) >>> 0);
+        }
+        return H.map(x => x.toString(16).padStart(8, '0')).join('');
+    }
+    function credHash(user, pass) { return sha256Hex('mabat:' + user + ':' + pass); }
+
+    function getAdminCreds() {
+        try {
+            const s = JSON.parse(localStorage.getItem(STORAGE_ADMIN_CREDS) || 'null');
+            if (s && s.username && s.hash) return s;
+            if (s && s.username && s.password) return { username: s.username, hash: credHash(s.username, s.password) }; // גרסה ישנה
+        } catch (e) {}
+        return DEFAULT_ADMIN;
+    }
+
+    function openAdminModal() {
+        document.getElementById('adminModal').classList.add('open');
+        setTimeout(() => document.getElementById('adminUser').focus(), 60);
+    }
+    function closeAdminModal() {
+        document.getElementById('adminModal').classList.remove('open');
+        document.getElementById('adminErr').style.display = 'none';
+        document.getElementById('adminUser').value = '';
+        document.getElementById('adminPass').value = '';
+    }
+    function doAdminLogin() {
+        const u = document.getElementById('adminUser').value.trim();
+        const p = document.getElementById('adminPass').value;
+        const creds = getAdminCreds();
+        if (u === creds.username && credHash(u, p) === creds.hash) {
+            try { sessionStorage.setItem(ADMIN_SESSION, '1'); } catch (e) {}
+            window.location.href = 'admin.html';
+        } else {
+            document.getElementById('adminErr').style.display = 'block';
+            document.getElementById('adminPass').value = '';
+            document.getElementById('adminPass').focus();
+        }
+    }
+
+    /** שמירת הנבחן בדפדפן הזה, כדי שיופיע ב-admin.html בעמדה הזו */
+    function saveStudentToLocalDB(r) {
+        let students = [];
+        try { students = JSON.parse(localStorage.getItem(STORAGE_STUDENTS) || '[]'); } catch (e) { students = []; }
+        if (!Array.isArray(students)) students = [];
+        const rec = {
+            id: 'stu_' + r.id, fullName: r.name, nationalId: r.id, role: r.role || '',
+            grade: r.t, storyScore: r.s, quizScore: r.q, stagePcts: r.stagePcts || [],
+            passThreshold: r.pass,
+            registeredAt: new Date(r.submittedAt).toLocaleDateString('he-IL'),
+            submittedAt: r.submittedAt, sheetStatus: r.status || 'sending', isManual: false
+        };
+        const idx = students.findIndex(s => s.nationalId === rec.nationalId);
+        if (idx >= 0) students[idx] = rec; else students.push(rec);
+        try { localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(students)); } catch (e) {}
+    }
+    function updateLocalSheetStatus(nationalId, status) {
+        try {
+            const students = JSON.parse(localStorage.getItem(STORAGE_STUDENTS) || '[]');
+            const s = students.find(x => x.nationalId === nationalId);
+            if (s) { s.sheetStatus = status; localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(students)); }
+        } catch (e) {}
+    }
 
     // כל מונח שמופיע במבחן חייב להופיע כאן. ההגדרות לא פותחות בפירוש ראשי התיבות, כדי לא לחשוף את התשובה בתרגול.
     const glossary = [
@@ -554,6 +704,10 @@
     }
 
     function goToExam() {
+        if (!CFG.allowReg) {
+            alert('ההרשמה למבחן סגורה כרגע. פנה למנהל.');
+            return;
+        }
         const fn = document.getElementById('fn').value.trim();
         const ln = document.getElementById('ln').value.trim();
         const uid = document.getElementById('uid').value.trim();
@@ -757,7 +911,7 @@
         let quizCorrect = 0;
         examState.quiz.forEach(q => { if (q.sel === 0) quizCorrect++; });
         const quizPct = Math.round((quizCorrect / quizQs.length) * 100);
-        const total = Math.round(storyPct * STORY_WEIGHT + quizPct * QUIZ_WEIGHT);
+        const total = Math.round(storyPct * CFG.wStory / 100 + quizPct * CFG.wQuiz / 100);
         return { stagePcts, storyPct, quizPct, quizCorrect, total };
     }
 
@@ -792,6 +946,13 @@
 
     async function transmit(result) {
         if (submitting) return;
+        if (!CFG.sendSheets) {
+            result.status = 'local';
+            ssSet(STORAGE_RESULT, result);
+            updateLocalSheetStatus(result.id, 'local');
+            renderReport(result);
+            return;
+        }
         submitting = true;
         result.status = 'sending';
         ssSet(STORAGE_RESULT, result);
@@ -800,6 +961,7 @@
         result.status = ok ? 'sent' : 'failed';
         result.sentAt = ok ? new Date().toISOString() : null;
         ssSet(STORAGE_RESULT, result);
+        updateLocalSheetStatus(result.id, result.status);
         renderReport(result);
         submitting = false;
     }
@@ -828,10 +990,14 @@
             t: sc.total,
             stagePcts: sc.stagePcts,
             quizCorrect: sc.quizCorrect,
+            pass: CFG.passThreshold,
+            wStory: CFG.wStory,
+            wQuiz: CFG.wQuiz,
             submittedAt: new Date().toISOString(),
             status: 'sending'
         };
         lockExam();
+        saveStudentToLocalDB(result);
         await transmit(result);
     }
 
@@ -843,12 +1009,17 @@
 
     function renderReport(r) {
         const box = document.getElementById('finalReport');
-        const passed = r.t >= PASS_MARK;
+        const passMark = Number.isFinite(r.pass) ? r.pass : CFG.passThreshold;
+        const wS = Number.isFinite(r.wStory) ? r.wStory : CFG.wStory;
+        const wQ = Number.isFinite(r.wQuiz) ? r.wQuiz : CFG.wQuiz;
+        const passed = r.t >= passMark;
         box.className = passed ? '' : 'fail';
         box.style.display = 'block';
 
         let sendHtml;
-        if (r.status === 'sent') {
+        if (r.status === 'local') {
+            sendHtml = '<div class="rep-send sent">💾 הציון נשמר בעמדה זו. שידור לגיליון כבוי בהגדרות המנהל.</div>';
+        } else if (r.status === 'sent') {
             sendHtml = '<div class="rep-send sent">📡 הציון שודר למערכת (' + timeHtml(r.sentAt) + ').<br>מומלץ לצלם מסך זה כאישור, למקרה שהרישום לא יופיע אצל המנהל.</div>';
         } else if (r.status === 'failed') {
             sendHtml = '<div class="rep-send failed">⚠️ שידור הציון נכשל — ייתכן שאין חיבור לרשת. הציון שמור בדף הזה.<br>' +
@@ -861,10 +1032,10 @@
         box.innerHTML =
             '<h2>' + (passed ? '✅ עברת בהצלחה!' : '❌ לא עברת') + '</h2>' +
             '<div>ציון סופי</div><div class="rep-total">' + r.t + '%</div>' +
-            '<div>ציון עובר: ' + PASS_MARK + '</div>' +
+            '<div>ציון עובר: ' + passMark + '</div>' +
             '<div class="rep-grid">' +
-                '<div class="rep-cell">משימות השלמה (40%)<b>' + r.s + '%</b></div>' +
-                '<div class="rep-cell">מבחן מסכם (60%)<b>' + r.q + '%</b></div>' +
+                '<div class="rep-cell">משימות השלמה (' + wS + '%)<b>' + r.s + '%</b></div>' +
+                '<div class="rep-cell">מבחן מסכם (' + wQ + '%)<b>' + r.q + '%</b></div>' +
                 stages +
             '</div>' +
             '<div class="rep-grid">' +
@@ -879,7 +1050,7 @@
 
     // ── תרגול ──────────────────────────────────────────────────────────────
     function randomPracticeTerms() {
-        return shuffleArray(allGlossaryTerms()).slice(0, Math.min(18, allGlossaryTerms().length));
+        return shuffleArray(allGlossaryTerms()).slice(0, Math.min(CFG.practiceQ, allGlossaryTerms().length));
     }
 
     function initPracticeRound() {
@@ -979,6 +1150,14 @@
         window.addEventListener('resize', applyDeviceLayout);
         window.addEventListener('orientationchange', applyDeviceLayout);
         initDict();
+        applySettingsToPage();
+        document.getElementById('adminFab').onclick = openAdminModal;
+        document.getElementById('adminClose').onclick = closeAdminModal;
+        document.getElementById('adminLoginBtn').onclick = doAdminLogin;
+        document.getElementById('adminPass').onkeydown = e => { if (e.key === 'Enter') doAdminLogin(); };
+        document.getElementById('adminUser').onkeydown = e => { if (e.key === 'Enter') document.getElementById('adminPass').focus(); };
+        document.getElementById('adminModal').addEventListener('click', e => { if (e.target.id === 'adminModal') closeAdminModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminModal(); });
         document.getElementById('btnPractice').onclick = showPracticeUI;
         document.getElementById('btnContinue').onclick = goToExam;
         document.getElementById('btnNextPractice').onclick = nextPracticeQuestion;
