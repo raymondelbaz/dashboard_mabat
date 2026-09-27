@@ -199,6 +199,10 @@
         .perm-error{color:#f87171;font-size:.78em;margin-top:4px;display:none;}
         .perm-success{color:var(--g);font-size:.78em;margin-top:4px;display:none;}
 
+        .local-note{background:rgba(29,78,216,.1);border:1px solid rgba(59,130,246,.35);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.84em;color:#bfdbfe;line-height:1.55;}
+        .local-note b{color:#fff;}
+        .sheet-st{font-size:.78em;white-space:nowrap;}
+        .sheet-st.sent{color:var(--g);} .sheet-st.failed{color:#f87171;} .sheet-st.other{color:var(--muted);}
         /* ── Toast ── */
         .toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:#1e293b;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.85em;color:var(--text);display:none;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:300px;}
         .toast.show{display:flex;}
@@ -214,7 +218,19 @@
         .confirm-actions{display:flex;gap:8px;justify-content:center;}
 
         /* ── Responsive ── */
-        @media(max-width:900px){.layout{grid-template-columns:1fr;} .sidebar{display:none;} .dash-body{padding:14px;}}
+        @media(max-width:900px){
+            .layout{grid-template-columns:1fr;}
+            .sidebar{position:static;height:auto;border-left:none;border-bottom:1px solid var(--border);}
+            .sb-brand{display:none;}
+            .sb-nav{display:flex;gap:4px;overflow-x:auto;padding:8px;}
+            .sb-section{display:none;}
+            .nav-item{width:auto;white-space:nowrap;margin:0;flex:0 0 auto;}
+            .nav-item.active{border-right:none;border-bottom:2px solid var(--a);}
+            .sb-footer{display:flex;gap:6px;padding:8px;flex-wrap:wrap;}
+            .sb-footer button{flex:1 1 140px;margin:0;}
+            .topbar{position:static;padding:10px 14px;}
+            .dash-body{padding:14px;}
+        }
         @media(max-width:600px){.kpi-grid{grid-template-columns:1fr 1fr;} .topbar-right .clock{display:none;}}
     </style>
 </head>
@@ -256,6 +272,7 @@
         </nav>
         <div class="sb-footer">
             <button class="btn-student-view" onclick="window.open('index.html','_blank')">👁 צפייה בדף התלמיד</button>
+            <button class="btn-student-view" onclick="newExaminee()" title="מנקה את המבחן שהוגש בלשונית הזו ופותח עמוד הרשמה נקי">🆕 נבחן חדש בעמדה זו</button>
             <button class="btn-logout" onclick="doLogout()">✕&nbsp;&nbsp;יציאה מהמערכת</button>
         </div>
     </aside>
@@ -277,10 +294,11 @@
 
             <!-- ══ TAB: דשבורד ══════════════════════════════════════════ -->
             <div class="tab-panel active" id="tab-dashboard">
+                <div class="local-note">ℹ️ הדשבורד מציג רק נבחנים שנבחנו <b>בדפדפן של המחשב הזה</b>. נבחנים שנבחנו ממחשב או מטלפון אחר מופיעים רק ב-Google Sheet.</div>
                 <div class="kpi-grid">
                     <div class="kpi-card total"><div class="kpi-label">👤 סה"כ חניכים</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">רשומים במערכת</div></div>
-                    <div class="kpi-card passed"><div class="kpi-label">✅ עברו</div><div class="kpi-value" id="kpi-passed">0</div><div class="kpi-sub">ציון 80+</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-passed" style="width:0%"></div></div></div>
-                    <div class="kpi-card failed"><div class="kpi-label">❌ נכשלו</div><div class="kpi-value" id="kpi-failed">0</div><div class="kpi-sub">ציון מתחת ל-80</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-failed" style="width:0%"></div></div></div>
+                    <div class="kpi-card passed"><div class="kpi-label">✅ עברו</div><div class="kpi-value" id="kpi-passed">0</div><div class="kpi-sub">ציון <span class="cur-pass">80</span> ומעלה</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-passed" style="width:0%"></div></div></div>
+                    <div class="kpi-card failed"><div class="kpi-label">❌ נכשלו</div><div class="kpi-value" id="kpi-failed">0</div><div class="kpi-sub">ציון מתחת ל-<span class="cur-pass">80</span></div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-failed" style="width:0%"></div></div></div>
                     <div class="kpi-card avg"><div class="kpi-label">📊 ממוצע</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-sub">מתוך הנבחנים</div><div class="kpi-bar-wrap"><div class="kpi-bar" id="bar-avg" style="width:0%"></div></div></div>
                 </div>
                 <div class="charts-row">
@@ -397,11 +415,12 @@
                             <th>#</th>
                             <th onclick="sortResults('fullName')" id="rth-fullName">שם מלא</th>
                             <th onclick="sortResults('nationalId')" id="rth-nationalId">ת.ז.</th>
-                            <th onclick="sortResults('storyScore')" id="rth-storyScore">גרירה 40%</th>
-                            <th onclick="sortResults('quizScore')" id="rth-quizScore">מבחן 60%</th>
+                            <th onclick="sortResults('storyScore')" id="rth-storyScore">השלמות</th>
+                            <th onclick="sortResults('quizScore')" id="rth-quizScore">מבחן</th>
                             <th onclick="sortResults('grade')" id="rth-grade">ציון סופי</th>
                             <th>סטטוס</th>
                             <th>מד ציון</th>
+                            <th>שידור לגיליון</th>
                         </tr></thead>
                         <tbody id="results-tbody"></tbody>
                     </table><div class="empty-state" id="results-empty" style="display:none">🔍 לא נמצאו תוצאות.</div></div>
@@ -415,17 +434,16 @@
                     <div class="settings-card">
                         <h3>🎯 סף מעבר וציונים</h3>
                         <div class="setting-row"><span class="setting-label">ציון מינימום לעבור</span><input class="setting-input" type="number" id="set-pass" min="0" max="100" value="80"/></div>
-                        <div class="setting-row"><span class="setting-label">משקל גרירה (%)</span><input class="setting-input" type="number" id="set-w-story" min="0" max="100" value="40"/></div>
+                        <div class="setting-row"><span class="setting-label">משקל משימות השלמה (%)</span><input class="setting-input" type="number" id="set-w-story" min="0" max="100" value="40"/></div>
                         <div class="setting-row"><span class="setting-label">משקל מבחן (%)</span><input class="setting-input" type="number" id="set-w-quiz" min="0" max="100" value="60"/></div>
                         <button class="save-settings-btn" onclick="saveSettings()">💾 שמור הגדרות</button>
-                        <div class="settings-note">* שינוי משקלים לא יחשב מחדש ציונים שכבר נשלחו. הסך של משקל גרירה + מבחן חייב להיות 100.</div>
+                        <div class="settings-note">* ההגדרות חלות על מבחנים חדשים בדפדפן של המחשב הזה בלבד. שינוי לא מחשב מחדש ציונים שכבר הוגשו. סכום המשקלים חייב להיות 100.</div>
                     </div>
                     <div class="settings-card">
                         <h3>🔧 הגדרות מערכת</h3>
-                        <div class="setting-row"><span class="setting-label">אפשר הרשמה חדשה</span><label class="toggle"><input type="checkbox" id="set-reg" checked/><span class="toggle-slider"></span></label></div>
-                        <div class="setting-row"><span class="setting-label">נעל לאחר הגשה</span><label class="toggle"><input type="checkbox" id="set-lock" checked/><span class="toggle-slider"></span></label></div>
-                        <div class="setting-row"><span class="setting-label">שלח לגוגל שיטס</span><label class="toggle"><input type="checkbox" id="set-sheets" checked/><span class="toggle-slider"></span></label></div>
-                        <div class="setting-row"><span class="setting-label">מספר שאלות תרגול</span><input class="setting-input" type="number" id="set-practice-q" min="5" max="96" value="18"/></div>
+                        <div class="setting-row"><span class="setting-label">אפשר כניסה למבחן</span><label class="toggle"><input type="checkbox" id="set-reg" checked/><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><span class="setting-label">שדר ציונים לגוגל שיטס</span><label class="toggle"><input type="checkbox" id="set-sheets" checked/><span class="toggle-slider"></span></label></div>
+                        <div class="setting-row"><span class="setting-label">מספר שאלות תרגול</span><input class="setting-input" type="number" id="set-practice-q" min="5" max="111" value="18"/></div>
                         <button class="save-settings-btn" onclick="saveSettings()">💾 שמור הגדרות</button>
                     </div>
                     <div class="settings-card">
@@ -440,12 +458,12 @@
                 <div class="export-grid">
                     <div class="export-card">
                         <h3>📊 כל הנתונים — CSV</h3>
-                        <p>ייצוא טבלה מלאה עם כל פרטי החניכים: שם, ת.ז., תפקיד, ציון גרירה, ציון מבחן, ציון סופי וסטטוס. מתאים לאקסל.</p>
+                        <p>ייצוא טבלה מלאה עם כל פרטי החניכים: שם, ת.ז., תפקיד, ציון השלמות, ציון מבחן, ציון סופי וסטטוס. מתאים לאקסל.</p>
                         <button class="export-btn-full" onclick="exportCSV('all')">⬇ הורד CSV מלא</button>
                     </div>
                     <div class="export-card">
                         <h3>✅ רק העוברים</h3>
-                        <p>ייצוא רשימת חניכים שעברו את הסף (80+) בלבד. שימושי לאישור כניסה לקורס.</p>
+                        <p>ייצוא רשימת חניכים שעברו את סף המעבר בלבד. שימושי לאישור כניסה לקורס.</p>
                         <button class="export-btn-full" onclick="exportCSV('passed')">⬇ הורד עוברים CSV</button>
                     </div>
                     <div class="export-card">
@@ -466,9 +484,9 @@
                 <div class="perms-card">
                     <h3>🔒 שינוי פרטי כניסה למנהל</h3>
                     <div class="perms-note">
-                        🛡 הפרטים נשמרים ב-localStorage של הדפדפן.<br>
-                        בסביבת ייצור יש לחבר ל-auth_store.js בצד השרת בלבד.<br>
-                        סיסמה נוכחית לצורך אימות שינוי.
+                        🛡 הסיסמה נשמרת כגיבוב (hash) ולא בטקסט גלוי, בדפדפן של המחשב הזה בלבד.<br>
+                        זו הגנה מפני נבחן סקרן, לא מפני מי שיודע להשתמש בכלי המפתחים של הדפדפן.<br>
+                        מומלץ להחליף את סיסמת ברירת המחדל מיד.
                     </div>
                     <div class="perm-field">
                         <label class="perm-label">שם משתמש חדש</label>
@@ -489,9 +507,6 @@
                         <div class="perm-success" id="perm-ok">✓ הפרטים עודכנו בהצלחה!</div>
                     </div>
                     <button class="save-settings-btn" onclick="savePermissions()">🔐 עדכן פרטי כניסה</button>
-                    <div class="settings-note" style="margin-top:14px">
-                        פרטי ברירת מחדל: שם משתמש <b style="color:var(--a)">admin</b> | סיסמה <b style="color:var(--a)">Mabat2026</b>
-                    </div>
                 </div>
             </div>
 
@@ -500,16 +515,19 @@
 </div><!-- /layout -->
 
 <script>
-// ── מפתחות localStorage ──────────────────────────────────────────────────
+// ── מפתחות אחסון (משותפים עם index.html) ───────────────────────────────
 const STORAGE_STUDENTS = 'mabatim_students_db';
 const STORAGE_ADMIN    = 'mabatim_admin_creds';
 const STORAGE_SETTINGS = 'mabatim_settings';
+const ADMIN_SESSION    = 'mabatim_admin_session';
+const DEFAULT_ADMIN    = { username:'admin', hash:'031682ccc7b1cc0f246e8be3a2e1dd5dc4fd7c34408d63885b010272b3acd8b4' };
+const EXAM_SESSION_KEYS = ['rayMabatReg','rayMabatExamLock','rayMabatExamState','rayMabatResult'];
 
 // ── בדיקת הרשאות ────────────────────────────────────────────────────────
+function hasSession() { try { return sessionStorage.getItem(ADMIN_SESSION) === '1'; } catch(e){ return false; } }
+
 window.onload = function() {
-    if (!localStorage.getItem('mabatim_admin_session')) {
-        window.location.href = 'index.html'; return;
-    }
+    if (!hasSession()) { window.location.replace('index.html'); return; }
     loadSettings();
     renderSettingsDisplay();
     const creds = getAdminCreds();
@@ -518,45 +536,84 @@ window.onload = function() {
     startClock();
     initTabs();
     refreshAll();
+    // עדכון אוטומטי כשנבחן מגיש בלשונית אחרת באותו דפדפן
+    window.addEventListener('storage', e => { if (e.key === STORAGE_STUDENTS) refreshAll(); });
 };
 
 function doLogout() {
-    localStorage.removeItem('mabatim_admin_session');
+    try { sessionStorage.removeItem(ADMIN_SESSION); } catch(e){}
     window.location.href = 'index.html';
 }
 
+function newExaminee() {
+    showConfirm('נבחן חדש', 'לנקות את המבחן של הנבחן הקודם בלשונית הזו ולפתוח עמוד הרשמה נקי? הציון שלו נשאר שמור בדשבורד.', () => {
+        try { EXAM_SESSION_KEYS.forEach(k => sessionStorage.removeItem(k)); sessionStorage.removeItem(ADMIN_SESSION); } catch(e){}
+        window.location.href = 'index.html';
+    });
+    document.getElementById('confirmYes').textContent = 'כן, נבחן חדש';
+}
+
+// ── SHA-256 (זהה לפונקציה ב-index.html) ─────────────────────────────────
+function sha256Hex(str) {
+    const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+    const bytes = new TextEncoder().encode(str);
+    const len = bytes.length, padded = ((len + 9 + 63) >> 6) << 6;
+    const buf = new Uint8Array(padded); buf.set(bytes); buf[len] = 0x80;
+    const dv = new DataView(buf.buffer);
+    dv.setUint32(padded - 4, (len * 8) >>> 0); dv.setUint32(padded - 8, Math.floor(len / 0x20000000));
+    let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    const W = new Uint32Array(64), r = (x, n) => (x >>> n) | (x << (32 - n));
+    for (let o = 0; o < padded; o += 64) {
+        for (let i = 0; i < 16; i++) W[i] = dv.getUint32(o + i * 4);
+        for (let i = 16; i < 64; i++) W[i] = (W[i-16] + (r(W[i-15],7) ^ r(W[i-15],18) ^ (W[i-15] >>> 3)) + W[i-7] + (r(W[i-2],17) ^ r(W[i-2],19) ^ (W[i-2] >>> 10))) >>> 0;
+        let [a, b, c, d, e, f, g, h] = H;
+        for (let i = 0; i < 64; i++) {
+            const t1 = (h + (r(e,6) ^ r(e,11) ^ r(e,25)) + ((e & f) ^ (~e & g)) + K[i] + W[i]) >>> 0;
+            const t2 = ((r(a,2) ^ r(a,13) ^ r(a,22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+            h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+        }
+        H = H.map((x, i) => (x + [a, b, c, d, e, f, g, h][i]) >>> 0);
+    }
+    return H.map(x => x.toString(16).padStart(8, '0')).join('');
+}
+function credHash(user, pass) { return sha256Hex('mabat:' + user + ':' + pass); }
+
 // ── אישורי מנהל ─────────────────────────────────────────────────────────
 function getAdminCreds() {
-    try { const s = localStorage.getItem(STORAGE_ADMIN); if(s) return JSON.parse(s); } catch(e){}
-    return { username:'admin', password:'Mabat2026' };
+    try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_ADMIN) || 'null');
+        if (s && s.username && s.hash) return s;
+        if (s && s.username && s.password) return { username: s.username, hash: credHash(s.username, s.password) };
+    } catch(e){}
+    return DEFAULT_ADMIN;
 }
 
 // ── הגדרות ──────────────────────────────────────────────────────────────
-const DEFAULT_SETTINGS = { passThreshold:80, wStory:40, wQuiz:60, allowReg:true, lockAfterSubmit:true, sendSheets:true, practiceQ:18 };
+const DEFAULT_SETTINGS = { passThreshold:80, wStory:40, wQuiz:60, allowReg:true, sendSheets:true, practiceQ:18 };
 let settings = { ...DEFAULT_SETTINGS };
 
 function loadSettings() {
     try { const s = localStorage.getItem(STORAGE_SETTINGS); if(s) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(s) }; } catch(e){}
+    delete settings.lockAfterSubmit;
     document.getElementById('set-pass').value      = settings.passThreshold;
     document.getElementById('set-w-story').value   = settings.wStory;
     document.getElementById('set-w-quiz').value    = settings.wQuiz;
     document.getElementById('set-reg').checked     = settings.allowReg;
-    document.getElementById('set-lock').checked    = settings.lockAfterSubmit;
     document.getElementById('set-sheets').checked  = settings.sendSheets;
     document.getElementById('set-practice-q').value = settings.practiceQ;
 }
 
 function saveSettings() {
-    const wS = parseInt(document.getElementById('set-w-story').value)||40;
-    const wQ = parseInt(document.getElementById('set-w-quiz').value)||60;
-    if (wS + wQ !== 100) { showToast('⚠️ משקל גרירה + מבחן חייב להיות 100', 'err'); return; }
+    const intOr = (id, d) => { const v = parseInt(document.getElementById(id).value, 10); return Number.isFinite(v) ? v : d; };
+    const wS = intOr('set-w-story', 40), wQ = intOr('set-w-quiz', 60), pass = intOr('set-pass', 80), pq = intOr('set-practice-q', 18);
+    if (wS < 0 || wQ < 0 || wS + wQ !== 100) { showToast('⚠️ סכום המשקלים חייב להיות 100', 'err'); return; }
+    if (pass < 0 || pass > 100) { showToast('⚠️ ציון מעבר חייב להיות בין 0 ל-100', 'err'); return; }
+    if (pq < 5 || pq > 111) { showToast('⚠️ מספר שאלות תרגול: בין 5 ל-111', 'err'); return; }
     settings = {
-        passThreshold: parseInt(document.getElementById('set-pass').value)||80,
-        wStory: wS, wQuiz: wQ,
+        passThreshold: pass, wStory: wS, wQuiz: wQ,
         allowReg: document.getElementById('set-reg').checked,
-        lockAfterSubmit: document.getElementById('set-lock').checked,
         sendSheets: document.getElementById('set-sheets').checked,
-        practiceQ: parseInt(document.getElementById('set-practice-q').value)||18
+        practiceQ: pq
     };
     localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
     renderSettingsDisplay();
@@ -565,12 +622,13 @@ function saveSettings() {
 }
 
 function renderSettingsDisplay() {
+    document.querySelectorAll('.cur-pass').forEach(el => el.textContent = settings.passThreshold);
     document.getElementById('settings-display').innerHTML =
         `<div>סף מעבר: <b style="color:var(--a)">${settings.passThreshold}</b></div>` +
-        `<div>משקל גרירה: <b style="color:var(--a)">${settings.wStory}%</b></div>` +
+        `<div>משקל השלמות: <b style="color:var(--a)">${settings.wStory}%</b></div>` +
         `<div>משקל מבחן: <b style="color:var(--a)">${settings.wQuiz}%</b></div>` +
-        `<div>הרשמה פתוחה: <b style="color:${settings.allowReg?'var(--g)':'#f87171'}">${settings.allowReg?'כן':'לא'}</b></div>` +
-        `<div>נעילה אחרי הגשה: <b style="color:var(--a)">${settings.lockAfterSubmit?'כן':'לא'}</b></div>` +
+        `<div>כניסה למבחן: <b style="color:${settings.allowReg?'var(--g)':'#f87171'}">${settings.allowReg?'פתוחה':'סגורה'}</b></div>` +
+        `<div>שידור לגיליון: <b style="color:${settings.sendSheets?'var(--g)':'#f87171'}">${settings.sendSheets?'פעיל':'כבוי'}</b></div>` +
         `<div>שאלות תרגול: <b style="color:var(--a)">${settings.practiceQ}</b></div>`;
 }
 
@@ -581,9 +639,20 @@ function getStudents() {
 function setStudents(arr) {
     localStorage.setItem(STORAGE_STUDENTS, JSON.stringify(arr));
 }
+/** מעבר נקבע לפי הסף שהיה בתוקף כשהנבחן נבחן — זה מה שהוצג לו על המסך */
+function passMarkOf(s) { return Number.isFinite(s.passThreshold) ? s.passThreshold : settings.passThreshold; }
 function passStatus(s) {
     if (s.grade === null || s.grade === undefined) return 'pending';
-    return s.grade >= settings.passThreshold ? 'pass' : 'fail';
+    return s.grade >= passMarkOf(s) ? 'pass' : 'fail';
+}
+function sheetCell(s) {
+    if (s.isManual) return '<span class="sheet-st other">הוזן ידנית</span>';
+    switch (s.sheetStatus) {
+        case 'sent':   return '<span class="sheet-st sent">✓ שודר</span>';
+        case 'failed': return '<span class="sheet-st failed">✗ נכשל</span>';
+        case 'local':  return '<span class="sheet-st other">שידור כבוי</span>';
+        default:       return '<span class="sheet-st other">לא אושר</span>';
+    }
 }
 
 // ── רענון כל הלשוניות ───────────────────────────────────────────────────
@@ -735,6 +804,7 @@ let confirmCallback = null;
 function showConfirm(title, msg, cb) {
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMsg').textContent   = msg;
+    document.getElementById('confirmYes').textContent   = 'כן, מחק';
     document.getElementById('confirmOverlay').classList.add('open');
     confirmCallback = cb;
     document.getElementById('confirmYes').onclick = () => { closeConfirm(); cb(); };
@@ -950,18 +1020,20 @@ function renderResults() {
         const story = s.storyScore!==null&&s.storyScore!==undefined ? s.storyScore : '—';
         const quiz  = s.quizScore!==null&&s.quizScore!==undefined   ? s.quizScore  : '—';
         const total_s = s.grade!==null&&s.grade!==undefined ? s.grade : '—';
-        const barPct  = s.grade!==null ? s.grade : 0;
-        const barClr  = s.grade>=settings.passThreshold ? '#27ae60' : s.grade>=60 ? '#f39c12' : '#b21f1f';
+        const barPct  = s.grade!==null&&s.grade!==undefined ? s.grade : 0;
+        const barClr  = passStatus(s)==='pass' ? '#27ae60' : s.grade>=60 ? '#f39c12' : '#b21f1f';
         const pilType = passStatus(s)==='pass'?'pass':passStatus(s)==='fail'?'fail':'pending';
+        const partPill = v => typeof v==='number' ? `<span class="grade-pill ${v>=passMarkOf(s)?'pass':'fail'}">${v}%</span>` : v;
         return `<tr>
             <td>${(resPage-1)*PAGE+i+1}</td>
             <td class="td-name">${esc(s.fullName)}</td>
             <td class="td-id">${esc(s.nationalId)}</td>
-            <td>${typeof story==='number'?`<span class="grade-pill ${story>=settings.wStory?'pass':'fail'}">${story}</span>`:story}</td>
-            <td>${typeof quiz==='number'?`<span class="grade-pill ${quiz>=settings.wQuiz?'pass':'fail'}">${quiz}</span>`:quiz}</td>
+            <td>${partPill(story)}</td>
+            <td>${partPill(quiz)}</td>
             <td><span class="grade-pill ${pilType}">${total_s}</span></td>
             <td>${badge}</td>
             <td><div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:${barPct}%;background:${barClr}"></div></div><span style="font-size:.72em;color:var(--muted)">${barPct}%</span></div></td>
+            <td>${sheetCell(s)}</td>
         </tr>`;
     }).join('');
     renderPager(total, resPage, 'setResPage', 'r-pager');
@@ -976,11 +1048,13 @@ function exportCSV(mode) {
     if (mode==='failed') { data=data.filter(s=>passStatus(s)==='fail'); filename='mabatim_failed.csv'; }
     if (mode==='results') { filename='mabatim_results.csv'; }
 
-    const hdrs = ['#','שם מלא','ת.ז.','תפקיד','תאריך הרשמה','גרירה','מבחן','ציון','סטטוס'];
+    const hdrs = ['#','שם מלא','ת.ז.','תפקיד','תאריך','השלמות','מבחן','ציון','סטטוס','שידור לגיליון'];
+    const sheetTxt = s => s.isManual ? 'ידני' : ({sent:'שודר',failed:'נכשל',local:'כבוי'}[s.sheetStatus] || 'לא אושר');
     const rows = data.map((s,i)=>[
         i+1, s.fullName, s.nationalId, s.role||'—', s.registeredAt||'—',
         s.storyScore??'—', s.quizScore??'—', s.grade??'ממתין',
-        passStatus(s)==='pass'?'עבר':passStatus(s)==='fail'?'נכשל':'ממתין'
+        passStatus(s)==='pass'?'עבר':passStatus(s)==='fail'?'נכשל':'ממתין',
+        sheetTxt(s)
     ]);
     const csv  = [hdrs,...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
     dlFile('\uFEFF'+csv, filename, 'text/csv;charset=utf-8;');
@@ -1025,12 +1099,12 @@ function savePermissions() {
     errEl.style.display='none'; okEl.style.display='none';
 
     const creds = getAdminCreds();
-    if (oldPass !== creds.password) { errEl.textContent='הסיסמה הנוכחית שגויה.'; errEl.style.display='block'; return; }
+    if (credHash(creds.username, oldPass) !== creds.hash) { errEl.textContent='הסיסמה הנוכחית שגויה.'; errEl.style.display='block'; return; }
     if (newUser.length < 4) { errEl.textContent='שם משתמש חייב להכיל לפחות 4 תווים.'; errEl.style.display='block'; return; }
     if (newPass && newPass.length < 8) { errEl.textContent='סיסמה חדשה חייבת להכיל לפחות 8 תווים.'; errEl.style.display='block'; return; }
     if (newPass && newPass !== newPass2) { errEl.textContent='הסיסמאות החדשות אינן תואמות.'; errEl.style.display='block'; return; }
 
-    const updated = { username: newUser, password: newPass||creds.password };
+    const updated = { username: newUser, hash: credHash(newUser, newPass || oldPass) };
     localStorage.setItem(STORAGE_ADMIN, JSON.stringify(updated));
     document.getElementById('adminName').textContent = newUser;
     document.getElementById('perm-old').value='';
